@@ -13,6 +13,7 @@ int main(int argc, char** argv) {
         char* java = find_java();
         if (java) {
             char* jargs[] = {java, "-jar", file, 0};
+            debug("Will try to launch java.\n");
             execvp(java, jargs);
 
             // The code below this line is not expected to be called

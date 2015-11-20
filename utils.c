@@ -29,11 +29,8 @@ void debug(const char* format, ...) {
 int file_exists(const char* fname) {
     FILE * exec = fopen(fname, "r");
     if (exec != NULL) {
-        debug("File `%s` exists\n", fname);
         fclose(exec);
         return 1;
-    } else {
-        debug("File `%s` does not exist\n", fname);
-        return 0;
     }
+    return 0;
 }

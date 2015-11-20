@@ -7,7 +7,7 @@
 
 char * check_java_in_path(char * binpath) {
     char * path = malloc(strlen(binpath)+6);
-    sprintf(path, "%s/java", binpath);
+    sprintf(path, "%s" SEPARATOR "java", binpath);
     if (file_exists(path)) {
         return path;
     } else {
@@ -21,7 +21,7 @@ char * get_from_JAVA_HOME() {
     if (jhome==NULL)
         return NULL;
     char * binpath = malloc(strlen(jhome) + 5);
-    sprintf(binpath, "%s/bin", jhome);
+    sprintf(binpath, "%s" SEPARATOR "bin", jhome);
     char * path = check_java_in_path(binpath);
     free(binpath);
     return path;
@@ -31,7 +31,7 @@ char * find_java() {
     char * path;
     int i = 0;
     if ((path = get_from_JAVA_HOME()) != NULL) {
-        debug("Java found using JAVA_HOME at `%s`\n", path);
+        debug("Java found using JAVA_HOME under `%s`\n", path);
        return path;
     }
     while (paths[i] != NULL) {
