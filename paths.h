@@ -1,7 +1,7 @@
 #ifndef PATHS_H
 #define PATHS_H
 
-char* paths[] = {
+char* PATHS[] = {
         "/usr/bin",
         "/etc/alternatives",
         "/System/Library/Frameworks/JavaVM.framework/Versions/Current/Commands",

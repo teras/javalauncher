@@ -1,7 +1,5 @@
-#ifndef JAVAHOUND_H
-#define JAVAHOUND_H
-
-char * find_java();
+#ifndef ERROR_MESSAGES_H
+#define ERROR_MESSAGES_H
 
 #define NO_JRE "It was not possible to locate a valid Java Runtime Environment (JRE) installed in your system. If indeed you don't have one, please go to http://www.java.com and download the latest JRE from there.\n\
 \n\

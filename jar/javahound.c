@@ -1,8 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "utils.h"
-#include "javahound.h"
+#include "debug.h"
+#include "file.h"
+#include "errormessages.h"
 #include "paths.h"
 
 char * check_java_in_path(char * binpath) {
@@ -34,8 +35,8 @@ char * find_java() {
         debug("Java found using JAVA_HOME under `%s`\n", path);
        return path;
     }
-    while (paths[i] != NULL) {
-        if ((path = check_java_in_path(paths[i])) != NULL) {
+    while (PATHS[i] != NULL) {
+        if ((path = check_java_in_path(PATHS[i])) != NULL) {
             debug("Java found under `%s`\n", path);
             return path;
         }

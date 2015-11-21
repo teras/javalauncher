@@ -1,10 +1,7 @@
-#include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 #include <stdarg.h>
-#include <libgen.h>
-#include <unistd.h>
-#include "utils.h"
+#include "arrays.h"
 
 int __debug = 0;
 
@@ -12,7 +9,7 @@ void init_args(int argc, char** argv) {
     for(int i = 1 ; i < argc ; i++)
         if (!memcmp(argv[i],"--debug",8)) {
             __debug = 1;
-            return;
+            break;
         }
 }
 
@@ -24,13 +21,4 @@ void debug(const char* format, ...) {
         vfprintf(stderr, format, argptr);
         va_end(argptr);
     }
-}
-
-int file_exists(const char* fname) {
-    FILE * exec = fopen(fname, "r");
-    if (exec != NULL) {
-        fclose(exec);
-        return 1;
-    }
-    return 0;
 }
