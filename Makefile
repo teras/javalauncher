@@ -19,7 +19,8 @@ EXEFILE=${DIST}/${NAME}
 TARGET = ${shell uname -s|tr [A-Z] [a-z]}
 
 all:compile
-	${EXEFILE} --debug
+	${EXEFILE} one two three
+	LAUNCHER_DEBUG=true ${EXEFILE} four five six seven eight nine ten
 
 compile:${EXEFILE}
 

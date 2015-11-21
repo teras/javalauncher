@@ -4,9 +4,9 @@
 #include "launcher.h"
 #include "arrays.h"
 
-strarray launcher(char* java, char* jar, strarray args) {
+char** launcher(char* java, char* jar, char** args) {
    // const char* found = getEntry(jar, LAUNCHER_ENTRY);
-    char* jargs[] = {java, "-jar", jar, "1", "2", "3", "4", 0};
-    return array_copy(jargs);
+    char* jargs[] = {java, "-jar", jar, 0};
+    return array_concat(jargs, args);
 }
 

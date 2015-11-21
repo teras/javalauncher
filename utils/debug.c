@@ -1,16 +1,12 @@
-#include <string.h>
+#include <stdlib.h>
 #include <stdio.h>
 #include <stdarg.h>
-#include "arrays.h"
+#include "debug.h"
 
 int __debug = 0;
 
-void init_args(int argc, char** argv) {
-    for(int i = 1 ; i < argc ; i++)
-        if (!memcmp(argv[i],"--debug",8)) {
-            __debug = 1;
-            break;
-        }
+void init_env() {
+    __debug = getenv(LAUNCHER_DEBUG) != NULL;
 }
 
 void debug(const char* format, ...) {
@@ -21,4 +17,8 @@ void debug(const char* format, ...) {
         vfprintf(stderr, format, argptr);
         va_end(argptr);
     }
+}
+
+int is_debug() {
+    return __debug;
 }

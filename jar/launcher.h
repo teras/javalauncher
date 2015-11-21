@@ -4,6 +4,6 @@
 
 #define LAUNCHER_ENTRY "META-INF/launcher"
 
-strarray launcher(char* java, char* jar, strarray args);
+char** launcher(char* java, char* jar, char** args);
 
 #endif

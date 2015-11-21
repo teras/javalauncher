@@ -1,12 +1,11 @@
 #ifndef ARRAYS_UTILS_H
 #define ARRAYS_UTILS_H
 
-typedef char** strarray;
-
-void array_free(strarray array);
-int array_size(strarray array);
-strarray array_copy(strarray array);
-strarray array_convert(char** argv, int argc);
-void array_print(strarray array);
+void array_free(char** array);
+int array_size(char** array);
+char** array_copy(char** array);
+char** array_convert(char** argv, int argc);
+void array_print(char** array);
+char** array_concat(char** first, char** second);
 
 #endif
