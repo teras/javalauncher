@@ -5,7 +5,10 @@ CFILES = $(wildcard *.c utils/*.c minizip/*.c jar/*.c)
 HFILES = $(wildcard *.h utils/*.h minizip/*.h jar/*h)
 SOURCE = ${CFILES} ${HFILES}
 
-CFLAGS=-lz -Oz -I. -Iutils -Iminizip -Ijar -Wall
+SIZEOPT=-Os
+#SIZEOPT=-Oz
+
+CFLAGS=-lz ${SIZEOPT} -I. -Iutils -Iminizip -Ijar -Wall
 
 MAKE ?= make
 CC ?= gcc
@@ -33,16 +36,13 @@ ${BUILD}:
 ${DIST}:
 	mkdir -p ${DIST}
 
-${BUILD}/${NAME}.linux:${BUILD}/${NAME}.linux64 ${BUILD}/${NAME}.linux32
-
-${BUILD}/${NAME}.linux64:${BUILD} ${SOURCE}
-	${CC} ${CFLAGS} -m64 -o ${BINFILE}64 ${CFILES}
-	strip -s ${BINFILE}64
+${BUILD}/${NAME}.linux:${BUILD} ${SOURCE} ${EXEFILE}32
+	${CC} ${CFILES} -o ${BINFILE} -m64 ${CFLAGS}
+	strip -s ${BINFILE}
 
 ${BUILD}/${NAME}.linux32:${BUILD} ${SOURCE}
-	${CC} ${CFLAGS} -m32 -o ${BINFILE}32 ${CFILES}
+	${CC} ${CFILES} -o ${BINFILE}32 -m32 ${CFLAGS}
 	strip -s ${BINFILE}32
-
 
 ${BUILD}/${NAME}.darwin:${BUILD} ${SOURCE}
 	${CC} ${CFLAGS} -arch x86_64 -arch i386 -mmacosx-version-min=10.4 -o ${BINFILE} ${CFILES}
@@ -53,3 +53,6 @@ ${EXEFILE}:${DIST} ${BINFILE}
 	cat ${BINFILE} ${JAR} >${EXEFILE}
 	chmod a+x ${EXEFILE}
 
+${EXEFILE}32:${DIST} ${BINFILE}32
+	cat ${BINFILE}32 ${JAR} >${EXEFILE}32
+	chmod a+x ${EXEFILE}32

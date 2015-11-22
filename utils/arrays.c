@@ -3,18 +3,21 @@
 #include <stdio.h>
 #include "arrays.h"
 
+#define MAXSTRSIZE 10000
+#define MAXARRAYSIZE MAXSTRSIZE
+
 void array_free(char** array) {
-    char** this_array = array;
-    while(array != 0) {
-        free(array);
-        array++;
+    char** walker = array;
+    while(*walker != 0) {
+        free(*walker);
+        walker++;
     }
-    free(this_array);
+    free(array);
 }
 
 int array_size(char** array) {
     int size = 0;
-    while(*array != 0 && size<10) {
+    while(*array != 0 && size < MAXARRAYSIZE) {
         size++;
         array++;
     }
@@ -23,7 +26,7 @@ int array_size(char** array) {
 
 void array_rawcopy(char** from, char** to, int size) {
     for(int i = 0 ; i < size ; i++) {
-        int length = strlen(from[i]);
+        int length = strnlen(from[i], MAXSTRSIZE);
         char* entry = malloc(length + 1);
         strncpy(entry, from[i], length);
         entry[length] = 0;
@@ -47,14 +50,48 @@ char** array_concat(char** first, char** second) {
     return data;
 }
 
-char** array_convert(char** array, int size) {
+char** array_convert(int size, char** array) {
     char** data = malloc(sizeof(char*)*(size+1));
     array_rawcopy(array, data, size);
     return data;
 }
 
 char** array_copy(char** array) {
-    return array_convert(array, array_size(array));
+    return array_convert(array_size(array), array);
+}
+
+char** array_split(char* input, char delimeter) {
+    int parts = 0;
+    int size = strnlen(input, MAXSTRSIZE);
+    int notFinalized = size>0 && *(input+size-1)!=delimeter;
+    for (int i = 0 ; i < size; i++)
+        if (*(input+i)==delimeter)
+            parts++;
+    if (notFinalized)
+        parts++;
+
+    int start = 0;
+    int idx = 0;
+    char** data = malloc(sizeof(char*)*(parts+1));
+    for (int i = 0 ; i < size; i++)
+        if (*(input+i)==delimeter) {
+            int entrysize = i - start;
+            char* entry = malloc(entrysize+1);
+            strncpy(entry, input+start, entrysize);
+            entry[entrysize] = 0;
+            data[idx] = entry;
+            idx++;
+            start = i+1;
+        }
+    if (notFinalized) {
+        int entrysize = size - start;
+        char* entry = malloc(entrysize+1);
+        strncpy(entry, input+start, entrysize);
+        entry[entrysize] = 0;
+        data[idx] = entry;
+    }
+    data[parts] = 0;
+    return data;
 }
 
 void array_print(char** array) {
@@ -66,4 +103,9 @@ void array_print(char** array) {
         printf("%s", array[i]);
     }
     printf("]\n");
+}
+
+char** array_replace(char** older, char** newer) {
+    array_free(older);
+    return newer;
 }

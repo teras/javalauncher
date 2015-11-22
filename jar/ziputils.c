@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include "unzip.h"
 
-const char* getEntry(const char *zipfile, const char* zipentryname) {
+char* getEntry(const char *zipfile, const char* zipentryname) {
     unzFile * file = unzOpen(zipfile);
     if (file != NULL) {
         if (unzLocateFile(file, zipentryname, NULL) == UNZ_OK) {
