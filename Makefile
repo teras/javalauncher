@@ -1,14 +1,14 @@
 JAR ?= test/test.jar
 NAME=launcher
 
-CFILES = $(wildcard *.c utils/*.c minizip/*.c jar/*.c)
-HFILES = $(wildcard *.h utils/*.h minizip/*.h jar/*h)
+CFILES = $(wildcard *.c utils/*.c lib/*.c core/*.c)
+HFILES = $(wildcard *.h utils/*.h lib/*.h core/*h)
 SOURCE = ${CFILES} ${HFILES}
 
 SIZEOPT=-Os
 #SIZEOPT=-Oz
 
-CFLAGS=-lz ${SIZEOPT} -I. -Iutils -Iminizip -Ijar -Wall
+CFLAGS=-DJSMN_PARENT_LINKS -lz ${SIZEOPT} -I. -Iutils -Ilib -Icore -Wall
 
 MAKE ?= make
 CC ?= gcc

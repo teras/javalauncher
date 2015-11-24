@@ -6,6 +6,7 @@
 #include "javahound.h"
 #include "arrays.h"
 #include "ziputils.h"
+#include "params.h"
 
 #define LAUNCHER_ENTRY "META-INF/launcher"
 
@@ -19,12 +20,14 @@ int main(int argc, char** argv) {
 
         char** args = array_copy(javabin);
 
-        char* found = getEntry(argv[0], LAUNCHER_ENTRY);
-        if (found!=NULL) {
-            char** embedparams = array_split(found, '\n');
-            free(found);
-            args = array_replace(args, array_concat(args, embedparams));
-            array_free(embedparams);
+        char* jsondata = getEntry(argv[0], LAUNCHER_ENTRY);
+        if (jsondata!=NULL) {
+            char** prefixparam = get_params(jsondata);
+            free(jsondata);
+            if (prefixparam != NULL) {
+                args = array_replace(args, array_concat(args,prefixparam));
+                array_free(prefixparam);
+            }
         }
 
         args = array_replace(args, array_concat(args, javajar));
