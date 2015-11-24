@@ -36,7 +36,7 @@ char** get_params(char* json) {
                     continue;
                 params = malloc(sizeof(char*) * argsize+1);
                 for(int ai = 1 ; ai <= argsize ; ai++) {
-                    char* arg = string_extract(json + tokens[i+ai].start, tokens[i+ai].end -tokens[i+ai].start);
+                    char* arg = string_unescape(json + tokens[i+ai].start, tokens[i+ai].end -tokens[i+ai].start);
                     params[ai-1] = arg;
                 }
                 params[argsize] = NULL;
