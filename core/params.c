@@ -1,5 +1,4 @@
 #include <string.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include "params.h"
 #include "arrays.h"
@@ -20,14 +19,14 @@ char** get_params(char* json) {
     jsmn_parse(&parser, json, json_size, tokens, token_size);
 
     if (tokens[0].type != JSMN_OBJECT) {
-        debug("Top JSON sould be object\n");
+        debug("JavaLauncher arguments should be enclosed in a JSON Object. Embedded arguments ignored.\n");
         return NULL;
     }
 
     char** params = NULL;
     for(int i = 0 ; i < token_size; i++) {
         if (tokens[i].parent == 0) {
-            if (memcmp("arguments", json+tokens[i].start, tokens[i].end - tokens[i].start)==0) {
+            if (memcmp("jvmargs", json+tokens[i].start, tokens[i].end - tokens[i].start)==0) {
                 i++;
                 if (tokens[i].type!=JSMN_ARRAY)
                     continue;
