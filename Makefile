@@ -1,4 +1,5 @@
-JAR ?= test/test.jar
+JARTEST ?= test/test.jar
+
 NAME=launcher
 
 CFILES = $(wildcard *.c utils/*.c lib/*.c core/*.c)
@@ -14,45 +15,51 @@ MAKE ?= make
 CC ?= gcc
 STRIP ?= strip
 
-BUILD=build
 DIST=dist
-BINFILE=${BUILD}/${NAME}.${TARGET}
-EXEFILE=${DIST}/${NAME}
+BINBASE=${DIST}/${NAME}
+BINFILE=${BINBASE}.${TARGET}
+TESTFILE=${DIST}/${NAME}
 
 TARGET = ${shell uname -s|tr [A-Z] [a-z]}
 
-all:compile
-	${EXEFILE} one two three
-	LAUNCHER_DEBUG=true ${EXEFILE} four five six seven eight nine ten
+.PHONY: compile
+compile:${BINFILE}
 
-compile:${EXEFILE}
+.PHONY: test
+test:${TESTFILE}
+	${TESTFILE} one δύο
 
+.PHONY: test32
+test32:${TESTFILE}32
+	${TESTFILE}32 one δύο
+
+.PHONY: testdebug
+testdebug:${TESTFILE}
+	LAUNCHER_DEBUG=true ${TESTFILE} one δύο
+
+.PHONY: clean
 clean:
-	rm -rf ${BUILD} ${DIST}
-
-${BUILD}:
-	mkdir -p ${BUILD}
+	rm -rf ${DIST}
 
 ${DIST}:
 	mkdir -p ${DIST}
 
-${BUILD}/${NAME}.linux:${BUILD} ${SOURCE} ${EXEFILE}32
+${BINBASE}.linux:${DIST} ${SOURCE} ${BINFILE}32
 	${CC} ${CFILES} -o ${BINFILE} -m64 ${CFLAGS}
 	strip -s ${BINFILE}
 
-${BUILD}/${NAME}.linux32:${BUILD} ${SOURCE}
+${BINBASE}.linux32:${DIST} ${SOURCE}
 	${CC} ${CFILES} -o ${BINFILE}32 -m32 ${CFLAGS}
 	strip -s ${BINFILE}32
 
-${BUILD}/${NAME}.darwin:${BUILD} ${SOURCE}
+${BINBASE}.darwin:${DIST} ${SOURCE}
 	${CC} ${CFLAGS} -arch x86_64 -arch i386 -mmacosx-version-min=10.4 -o ${BINFILE} ${CFILES}
 	${STRIP} ${BINFILE}
 
+${TESTFILE}:${DIST} ${BINFILE} ${JARTEST}
+	cat ${BINFILE} ${JARTEST} >${TESTFILE}
+	chmod a+x ${TESTFILE}
 
-${EXEFILE}:${DIST} ${BINFILE}
-	cat ${BINFILE} ${JAR} >${EXEFILE}
-	chmod a+x ${EXEFILE}
-
-${EXEFILE}32:${DIST} ${BINFILE}32
-	cat ${BINFILE}32 ${JAR} >${EXEFILE}32
-	chmod a+x ${EXEFILE}32
+${TESTFILE}32:${DIST} ${BINFILE}32 ${JARTEST}
+	cat ${BINFILE}32 ${JARTEST} >${TESTFILE}32
+	chmod a+x ${TESTFILE}32

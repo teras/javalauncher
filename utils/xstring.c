@@ -35,6 +35,9 @@ char* string_unescape(char* buffer, int length) {
             case 't':
                 result[idx] = '\t';
                 break;
+            case 'b':
+                result[idx] = '\b';
+                break;
             case 'f':
                 result[idx] = '\f';
                 break;
@@ -46,6 +49,6 @@ char* string_unescape(char* buffer, int length) {
             result[idx] = buffer[i];
         }
     }
-    result[length-count+1] = 0;
+    result[length-count] = 0;
     return result;
 }
