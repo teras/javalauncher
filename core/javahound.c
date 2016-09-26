@@ -48,6 +48,8 @@ char * find_java() {
     return NULL;
 }
 
+
+
 void append_jar_ext(char* jar) {
     jar[0] = '.';
     jar[1] = 'j';
@@ -87,13 +89,17 @@ char * find_jar(const char* argv0, int isvalid) {
     } else {
         if (find_jar_by_exec(jar, size))
             return jar;
-        memcpy(jar, argv0, size);
+        memcpy(jar, argv0, size+1);
         if ((jar[size-2]=='3' && jar[size-1]=='2') || (jar[size-2]=='6' && jar[size-1]=='4')) {
-            jar[size-2] = 0;
-            if (find_jar_by_exec(jar, size-2))
+            size-=2;
+            jar[size] = 0;
+            if (find_jar_by_exec(jar, size))
                 return jar;
+            size+=4;
         }
-       free(jar);
+        append_jar_ext(jar+size);
+        fprintf(stderr, "Unable to locate JAR `%s`\n", basename(jar));
+        free(jar);
         return NULL;
     }
 }

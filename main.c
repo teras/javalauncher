@@ -31,10 +31,8 @@ int main(int argc, char** argv) {
             }
         }
         char* jar = find_jar(argv[0], isvalid);
-        if (jar==NULL) {
-            fprintf(stderr, "Unable to locate JAR\n");
+        if (jar == NULL)
             return EXIT_FAILURE;
-        }
         javajar[1] = jar;
 
         args = array_replace(args, array_concat(args, javajar));
