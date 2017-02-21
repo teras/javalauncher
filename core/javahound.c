@@ -37,7 +37,7 @@ char * find_java() {
        return path;
     }
     while (PATHS[i] != NULL) {
-        debug("Searching for JRE under `%s` %s\n", PATHS[i], SEPARATOR);
+        debug("Searching for JRE under `%s`\n", PATHS[i]);
         if ((path = check_java_in_path(PATHS[i])) != NULL) {
             debug("Java found under `%s`\n", path);
             return path;
@@ -58,12 +58,21 @@ void append_jar_ext(char* jar) {
     jar[4] = 0;
 }
 
+int find_jar_by_exec_impl(char* jar) {
+    if (file_exists(jar)) {
+        debug("Found JAR file under %s\n", jar);
+        return 1;
+    } else {
+        debug("Unable to find JAR file under %s\n", jar);
+        return 0;
+    }
+}
+
 int find_jar_by_exec(char* jar, int size) {
     char*fname = basename(jar);
     int fsize = strlen(fname);
     append_jar_ext(jar+size);
-    debug("Guessing JAR file under %s\n", jar);
-    if (file_exists(jar))
+    if (find_jar_by_exec_impl(jar))
         return 1;
     size=strnlen(dirname(jar), size);
     jar[size+1] = 'l';
@@ -72,10 +81,7 @@ int find_jar_by_exec(char* jar, int size) {
     jar[size+4] = SEPARATOR[0];
     memcpy(jar+size+5,fname, fsize);
     append_jar_ext(jar+size+fsize+5);
-    debug("Guessing JAR file under %s\n", jar);
-    if (file_exists(jar))
-        return 1;
-    return 0;
+    return find_jar_by_exec_impl(jar);
 }
 
 char * find_jar(const char* argv0, int isvalid) {
