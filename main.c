@@ -29,7 +29,7 @@ int main(int argc, char** argv) {
             return EXIT_FAILURE;
         javajar[1] = jar;
 
-        char* jsondata = getEntry(argv[0], LAUNCHER_ENTRY, NULL);
+        char* jsondata = getEntry(jar, LAUNCHER_ENTRY, NULL);
         if (jsondata != NULL) {
             char** prefixparam = get_params(jsondata);
             free(jsondata);
