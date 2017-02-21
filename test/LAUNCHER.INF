@@ -1,0 +1,7 @@
+{
+  "version": 1,
+  "jvmargs": [
+    "-Dvalue1=Parameter\n with newline\tand tab",
+    "-Dvalue2=Unicode: κλειδί Schlüssel ʃlʏsəl"
+  ]
+}
