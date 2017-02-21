@@ -81,7 +81,7 @@ int find_jar_by_exec(char* jar, int size) {
 char * find_jar(const char* argv0, int isvalid) {
     char* jar;
     int size = strlen(argv0);
-    jar = malloc(size + 9); // lib/.jar + '0'
+    jar = malloc(size + 9); // lib/.jar + \0
     memcpy(jar, argv0, size);
     if (isvalid) {
         jar[size] = 0;
