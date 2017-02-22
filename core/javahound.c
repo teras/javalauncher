@@ -37,10 +37,11 @@ char * find_java() {
        return path;
     }
     while (PATHS[i] != NULL) {
-        debug("Searching for JRE under `%s`\n", PATHS[i]);
         if ((path = check_java_in_path(PATHS[i])) != NULL) {
             debug("Java found under `%s`\n", path);
             return path;
+        } else {
+            debug("Unable to find Java under `%s`\n", PATHS[i]);
         }
         i++;
     }
@@ -69,17 +70,23 @@ int find_jar_by_exec_impl(char* jar) {
 }
 
 int find_jar_by_exec(char* jar, int size) {
-    char*fname = basename(jar);
-    int fsize = strlen(fname);
+    char*basen = basename(jar);
+    int fsize = strlen(basen);
+    char* fname = malloc(size+1+4);   // '\0' "/lib"
+    memcpy(fname, basen, fsize+1);
+    fname[size] = '\0';
+
     append_jar_ext(jar+size);
     if (find_jar_by_exec_impl(jar))
         return 1;
     size=strnlen(dirname(jar), size);
+    jar[size] = SEPARATOR[0];
     jar[size+1] = 'l';
     jar[size+2] = 'i';
     jar[size+3] = 'b';
     jar[size+4] = SEPARATOR[0];
     memcpy(jar+size+5,fname, fsize);
+    free(fname);
     append_jar_ext(jar+size+fsize+5);
     return find_jar_by_exec_impl(jar);
 }
