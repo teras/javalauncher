@@ -1,0 +1,6 @@
+To compile this project under linux, the following extra packages might be retuired:
+
+
+libc6-dev-i386
+zlib1g-dev
+zlib1g-dev:i386
