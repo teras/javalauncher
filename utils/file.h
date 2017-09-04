@@ -9,6 +9,7 @@
 #  define SEPARATOR "\\"
 #endif
 
+char* getExecPath();
 int file_exists(const char* fname);
 
 #endif

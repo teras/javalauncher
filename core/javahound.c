@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <libgen.h>
+#include <unistd.h>
 #include "debug.h"
 #include "file.h"
 #include "errormessages.h"
@@ -75,12 +76,16 @@ int find_jar_by_exec(char* jar, int size) {
     char* fname = malloc(size+1+4);   // '\0' "/lib"
     memcpy(fname, basen, fsize+1);
     fname[size] = '\0';
-
     append_jar_ext(jar+size);
     if (find_jar_by_exec_impl(jar))
         return 1;
-    size=strnlen(dirname(jar), size);
-    jar[size] = SEPARATOR[0];
+    char* dir = dirname(jar);
+    size=strnlen(dir, size);
+    if ( size==1 && strncmp(".", dir,1)==0) {
+        size=-1;
+    } else {
+        jar[size] = SEPARATOR[0];
+    }
     jar[size+1] = 'l';
     jar[size+2] = 'i';
     jar[size+3] = 'b';

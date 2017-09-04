@@ -7,6 +7,7 @@
 #include "arrays.h"
 #include "ziputils.h"
 #include "params.h"
+#include "file.h"
 
 #define LAUNCHER_ENTRY "META-INF/LAUNCHER.INF"
 #define MANIFEST_ENTRY "META-INF/MANIFEST.MF"
@@ -22,8 +23,14 @@ int main(int argc, char** argv) {
         char** args = array_copy(javabin);
 
         int isvalid = 0;
-        void* manifest = getEntry(argv[0], MANIFEST_ENTRY, &isvalid);
-        char* jar = find_jar(argv[0], isvalid);
+        char* selfpath = getExecPath();
+        if (selfpath==NULL) {
+            fprintf(stderr, "Unable to retrieve self location");
+            return EXIT_FAILURE;
+        }
+        void* manifest = getEntry(selfpath, MANIFEST_ENTRY, &isvalid);
+        char* jar = find_jar(selfpath, isvalid);
+        free(selfpath);
         free(manifest);
         if (jar == NULL)
             return EXIT_FAILURE;
