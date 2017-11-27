@@ -73,12 +73,15 @@ int find_jar_by_exec_impl(char* jar) {
 int find_jar_by_exec(char* jar, int size) {
     char*basen = basename(jar);
     int fsize = strlen(basen);
-    char* fname = malloc(size+1+4);   // '\0' "/lib"
-    memcpy(fname, basen, fsize+1);
+    char* fname = malloc(fsize+1);
+    memcpy(fname, basen, fsize);
     fname[size] = '\0';
+
     append_jar_ext(jar+size);
-    if (find_jar_by_exec_impl(jar))
+    if (find_jar_by_exec_impl(jar)) {
+        free(fname);
         return 1;
+    }
     char* dir = dirname(jar);
     size=strnlen(dir, size);
     if ( size==1 && strncmp(".", dir,1)==0) {
@@ -91,15 +94,29 @@ int find_jar_by_exec(char* jar, int size) {
     jar[size+3] = 'b';
     jar[size+4] = SEPARATOR[0];
     memcpy(jar+size+5,fname, fsize);
-    free(fname);
     append_jar_ext(jar+size+fsize+5);
+    if (find_jar_by_exec_impl(jar)) {
+        free(fname);
+        return 1;
+    }
+
+    jar[size+1] = '.';
+    jar[size+2] = '.';
+    jar[size+3] = '/';
+    jar[size+4] = 'l';
+    jar[size+5] = 'i';
+    jar[size+6] = 'b';
+    jar[size+7] = SEPARATOR[0];
+    memcpy(jar+size+8,fname, fsize);
+    append_jar_ext(jar+size+fsize+8);
+    free(fname);
     return find_jar_by_exec_impl(jar);
 }
 
 char * find_jar(const char* argv0, int isvalid) {
     char* jar;
     int size = strlen(argv0);
-    jar = malloc(size + 9); // lib/.jar + \0
+    jar = malloc(size + 12); // ../lib/.jar + \0
     memcpy(jar, argv0, size);
     jar[size] = 0;
     if (isvalid) {
