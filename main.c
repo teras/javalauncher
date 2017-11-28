@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <libgen.h>
 #include <unistd.h>
+#include <string.h>
 #include "debug.h"
 #include "javahound.h"
 #include "arrays.h"
@@ -30,11 +31,20 @@ int main(int argc, char** argv) {
         }
         void* manifest = getEntry(selfpath, MANIFEST_ENTRY, &isvalid);
         char* jar = find_jar(selfpath, isvalid);
-        free(selfpath);
         free(manifest);
         if (jar == NULL)
             return EXIT_FAILURE;
         javajar[1] = jar;
+
+        int size = strlen(selfpath);
+        char* selfpathparam = malloc(size+1+13);
+        memcpy(selfpathparam, "-Dself.exec=", 12);
+        memcpy(selfpathparam+12, selfpath, size);
+        selfpathparam[12+size] = '\0';
+        free(selfpath);
+        char* selfpathparamarray[] = {selfpathparam, 0};
+        args = array_replace(args, array_concat(args, selfpathparamarray));
+        free(selfpathparam);
 
         char* jsondata = getEntry(jar, LAUNCHER_ENTRY, NULL);
         if (jsondata != NULL) {
