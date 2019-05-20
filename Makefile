@@ -1,27 +1,38 @@
-.PHONY: clean all osx linux test
+.PHONY: clean all osx linux windows test
+
+NAME=javalauncher
 
 NIMFILES = $(wildcard *.nim *.c)
 
-all:osx linux
+all:osx linux windows
 
 clean:
 	rm -rf target
 
-osx:target/javalauncher.osx
+osx:target/${NAME}.osx
 
-linux:target/javalauncher.linux
+linux:target/${NAME}.linux
 
-target/javalauncher.osx:${NIMFILES}
-	nim c -d:release --opt:size javalauncher
-	strip javalauncher
+windows:target/${NAME}.64.exe
+
+target/${NAME}.osx:${NIMFILES}
 	mkdir -p target
-	mv javalauncher target/javalauncher.osx
+	nim c -d:release --opt:size ${NAME}
+	strip ${NAME}
+	mv ${NAME} target/${NAME}.osx
 
-target/javalauncher.linux:${NIMFILES}
-	docker run --rm -v `pwd`:/usr/src/app -w /usr/src/app nimlang/nim nim c -d:release --opt:size javalauncher
-	docker run --rm -v `pwd`:/usr/src/app -w /usr/src/app nimlang/nim strip javalauncher
+target/${NAME}.linux:${NIMFILES}
 	mkdir -p target
-	mv javalauncher target/javalauncher.linux
+	docker run --rm -v `pwd`:/usr/src/app -w /usr/src/app teras/nimcross bash -c "nim c -d:release --opt:size ${NAME} && strip ${NAME}"
+	mv ${NAME} target/${NAME}.linux
+
+target/${NAME}.64.exe:${NIMFILES}
+	mkdir -p target
+	docker run --rm -v `pwd`:/usr/src/app -w /usr/src/app teras/nimcross bash -c "nim c -d:release --opt:size -d:mingw --cpu:i386  ${NAME} && i686-w64-mingw32-strip   ${NAME}.exe"
+	mv ${NAME}.exe target/${NAME}.32.exe
+	docker run --rm -v `pwd`:/usr/src/app -w /usr/src/app teras/nimcross bash -c "nim c -d:release --opt:size -d:mingw --cpu:amd64 ${NAME} && x86_64-w64-mingw32-strip ${NAME}.exe"
+	mv ${NAME}.exe target/${NAME}.64.exe
+
 
 test:osx
 	mkdir -p target/java/classes
@@ -29,5 +40,5 @@ test:osx
 	mkdir -p target/java/classes/META-INF
 	cp java/LAUNCHER.INF target/java/classes/META-INF
 	jar cmf java/MANIFEST.MF target/java/test.jar  -C target/java/classes .
-	cp target/javalauncher.osx target/java/test
+	cp target/${NAME}.osx target/java/test
 	target/java/test param1 param2

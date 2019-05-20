@@ -1,4 +1,4 @@
-import debug, os, ospaths, strutils, unicode
+import debug, os, ospaths, strutils
 
 const JAVA = when system.hostOS == "windows": "java.exe" else: "java"
 
@@ -14,28 +14,38 @@ const PATHS = @[
     "/opt/shared/bin"
 ]
 
-template returnIfExists(dir:string, jar:string): untyped =
-    var file = dir & DirSep & jar
-    if file.fileExists:
-        return file
-    var file = dir & DirSep & jar.toLower
-    if file.fileExists:
-        return file
-
-template returnIfExists(locations:seq[string]): untyped =
-    for path in locations:
-        let javabin = path & DirSep & JAVA
-        if javabin.fileExists:
-            return javabin
-
 
 proc find_java*(): string =
-    returnIfExists(@[getEnv("JAVA_HOME") & DirSep & "bin"])
-    returnIfExists(getEnv("PATH").split(PathSep))
-    returnIfExists(PATHS)
+    template returnIf(location: string): untyped =
+        let javabin = location & DirSep & JAVA
+        if javabin.fileExists:
+            return javabin
+    template returnIf(locations: seq[string]): untyped =
+        for path in locations:
+            returnIf path
+    template returnIfRec(location: string): untyped =
+        for dir in walkDir location:
+            if dir.kind == PathComponent.pcDir:
+                returnIf dir.path & DirSep & "bin"
+
+    var current = getAppFilename().parentDir()
+    returnIfRec current
+    returnIfRec current.parentDir
+    returnIf getEnv("JAVA_HOME") & DirSep & "bin"
+    returnIf getEnv("PATH").split(PathSep)
+    returnIf PATHS
     error "Unable to locate Java executable"
 
-proc find_jar*() : string =
+
+proc find_jar*(): string =
+    template returnIf(dir: string, jar: string): untyped =
+        var file = dir & DirSep & jar
+        if file.fileExists:
+            return file
+        var file = dir & DirSep & jar.toLower
+        if file.fileExists:
+            return file
+
     let full = getAppFilename()
     let dir = full.parentDir()
 
@@ -46,8 +56,8 @@ proc find_jar*() : string =
             error "Not a valid executable"
     filename.add(".jar")
 
-    returnIfExists dir, filename
-    returnIfExists dir & DirSep & "lib", filename
-    returnIfExists dir.parentDir & DirSep & "Java", filename
-    returnIfExists dir.parentDir & DirSep & "lib", filename
+    returnIf dir, filename
+    returnIf dir & DirSep & "lib", filename
+    returnIf dir.parentDir & DirSep & "Java", filename
+    returnIf dir.parentDir & DirSep & "lib", filename
     error "Unable to locate JAR"

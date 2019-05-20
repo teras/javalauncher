@@ -1,7 +1,7 @@
-proc debug*(message:string):void =
-    #echo message
+proc debug*(message: string): void =
+    echo message
     return
 
-proc error*(message:string):void =
+proc error*(message: string): void =
     echo message
     quit(QuitFailure)
