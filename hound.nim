@@ -42,7 +42,7 @@ proc find_jar*(): string =
         var file = dir & DirSep & jar
         if file.fileExists:
             return file
-        var file = dir & DirSep & jar.toLower
+        var file = dir & DirSep & jar.toLowerAscii
         if file.fileExists:
             return file
 
