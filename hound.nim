@@ -1,6 +1,6 @@
 import debug, os, ospaths, strutils
 
-const JAVA = when system.hostOS == "windows": "java.exe" else: "java"
+const JAVA = when system.hostOS == "windows": "javaw.exe" else: "java"
 
 const PATHS = @[
     "/usr/bin",
@@ -50,7 +50,9 @@ proc find_jar*(): string =
     let dir = full.parentDir()
 
     var filename = full.extractFilename()
-    if (filename.endsWith("32") or filename.endsWith("64")):
+    if filename.endsWith(".exe"):
+        filename.delete(filename.len-3, filename.len)
+    if filename.endsWith("32") or filename.endsWith("64"):
         filename.delete(filename.len-1, filename.len)
         if (filename == ""):
             error "Not a valid executable"

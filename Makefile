@@ -7,7 +7,7 @@ NIMFILES = $(wildcard *.nim *.c)
 all:osx linux windows
 
 clean:
-	rm -rf target
+	rm -rf target nimcache
 
 osx:target/${NAME}.osx
 
@@ -28,9 +28,9 @@ target/${NAME}.linux:${NIMFILES}
 
 target/${NAME}.64.exe:${NIMFILES}
 	mkdir -p target
-	docker run --rm -v `pwd`:/usr/src/app -w /usr/src/app teras/nimcross bash -c "nim c -d:release --opt:size -d:mingw --cpu:i386  ${NAME} && i686-w64-mingw32-strip   ${NAME}.exe"
+	docker run --rm -v `pwd`:/usr/src/app -w /usr/src/app teras/nimcross bash -c "nim c -d:release --opt:size -d:mingw --cpu:i386  --app:gui ${NAME} && i686-w64-mingw32-strip   ${NAME}.exe"
 	mv ${NAME}.exe target/${NAME}.32.exe
-	docker run --rm -v `pwd`:/usr/src/app -w /usr/src/app teras/nimcross bash -c "nim c -d:release --opt:size -d:mingw --cpu:amd64 ${NAME} && x86_64-w64-mingw32-strip ${NAME}.exe"
+	docker run --rm -v `pwd`:/usr/src/app -w /usr/src/app teras/nimcross bash -c "nim c -d:release --opt:size -d:mingw --cpu:amd64 --app:gui ${NAME} && x86_64-w64-mingw32-strip ${NAME}.exe"
 	mv ${NAME}.exe target/${NAME}.64.exe
 
 
