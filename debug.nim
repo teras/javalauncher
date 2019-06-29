@@ -1,6 +1,6 @@
 import os
 
-let shouldDebug = existsEnv("DEBUG")
+let shouldDebug* = existsEnv("DEBUG")
 
 proc debug*(message: string): void =
     if shouldDebug:

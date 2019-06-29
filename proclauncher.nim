@@ -1,4 +1,4 @@
-import osproc, streams
+import osproc, streams, debug
 
 var exec:Process = nil
 
@@ -9,7 +9,8 @@ proc hook() {.noconv.} =
 
 proc launch*(cmd:string, args:seq[string]) =
     setControlCHook(hook)
-    exec = startProcess(cmd, args=args, options={poEchoCmd})
+    let opts :set[ProcessOption] = if debug.shouldDebug: {poEchoCmd} else: {}
+    exec = startProcess(cmd, args=args, options=opts)
     let outS = exec.outputStream()
     let errS = exec.errorStream()
     var line = newStringOfCap(120).TaintedString
