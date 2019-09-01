@@ -1,4 +1,4 @@
-import debug, os, ospaths, strutils
+import debug, os, strutils
 
 const JAVA = when system.hostOS == "windows": "javaw.exe" else: "java"
 

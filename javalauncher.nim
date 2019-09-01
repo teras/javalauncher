@@ -1,6 +1,6 @@
 const USE_CARVER = true
 
-import hound, debug, ospaths, os, proclauncher
+import hound, debug, os, proclauncher
 when USE_CARVER: import carver
 from strutils import replace
 

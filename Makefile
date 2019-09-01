@@ -17,7 +17,7 @@ windows:target/${NAME}.64.exe
 
 target/${NAME}.osx:${NIMFILES}
 	mkdir -p target
-	nim c -d:release --opt:size ${NAME}
+	nim c -d:release --opt:size --passC="-mmacosx-version-min=10.7" --passL="-mmacosx-version-min=10.7" ${NAME}
 	strip ${NAME}
 	mv ${NAME} target/${NAME}.osx
 
