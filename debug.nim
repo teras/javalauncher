@@ -8,5 +8,5 @@ proc debug*(message: string): void =
     return
 
 proc error*(message: string): void =
-    echo message
+    stderr.writeLine message
     quit(QuitFailure)

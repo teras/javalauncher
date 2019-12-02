@@ -14,6 +14,7 @@ const PATHS = @[
     "/opt/shared/bin"
 ]
 
+proc findSelf*(): string {.inline.} = getAppFilename().absolutePath().normalizedPath()
 
 proc find_java*(): string =
     template returnIf(location: string): untyped =
@@ -28,7 +29,7 @@ proc find_java*(): string =
             if dir.kind == PathComponent.pcDir:
                 returnIf dir.path & DirSep & "bin"
 
-    var current = getAppFilename().parentDir()
+    var current = findSelf().parentDir()
     returnIfRec current
     returnIfRec current.parentDir
     returnIf getEnv("JAVA_HOME") & DirSep & "bin"
@@ -37,16 +38,16 @@ proc find_java*(): string =
     error "Unable to locate Java executable"
 
 
-proc find_jar*(): string =
+proc find_jar*(selfName : string): string =
     template returnIf(dir: string, jar: string): untyped =
         var file = dir & DirSep & jar
         if file.fileExists:
             return file
-        var file = dir & DirSep & jar.toLowerAscii
+        file = dir & DirSep & jar.toLowerAscii
         if file.fileExists:
             return file
 
-    let full = getAppFilename()
+    let full = findSelf()
     let dir = full.parentDir()
 
     var filename = full.extractFilename()

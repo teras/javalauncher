@@ -1,47 +1,37 @@
-import nim_miniz, debug, json
+import json
 
-proc get_file_name(zadrr: ptr mz_zip_archive, i: mz_uint): string {.inline.} =
-    var size = zadrr.mz_zip_reader_get_filename(i.mz_uint, result, 0)
-    result.setLen(size.int)
-    doAssert zadrr.mz_zip_reader_get_filename(i.mz_uint, result,
-            size) > 0.mz_uint
-    # drop trailing byte.
-    result = result[0..<result.high]
+const SIGNATURE* = "jrlc"
+const SIGLEN = SIGNATURE.len
+const SIZELEN = 2
 
-proc extractData*(file: string): string =
-    var zip: mz_zip_archive
-    var filestat: mz_zip_archive_file_stat
-    let zadrr: ptr mz_zip_archive = zip.addr
+proc loadJson*(launcherPath: string): string {.inline.} =
+    result = ""
+    var file  = open(launcherPath)
+    var signature = newString(SIGLEN)
+    file.setFilePos(-SIGLEN, fspEnd)
+    if (file.readChars(signature, 0, SIGLEN) == SIGLEN and signature == "jrlc"):
+        var lengthBuffer : array[SIZELEN, uint8];
+        file.setFilePos(-SIGLEN-SIZELEN, fspEnd)
+        if (file.readBytes(lengthBuffer, 0, SIZELEN) == SIZELEN):
+            let length : int = int(lengthBuffer[0]) * 256 + int(lengthBuffer[1])
+            file.setFilePos(-length-SIGLEN-SIZELEN, fspEnd)
+            var json = newString(length)
+            if (file.readChars(json, 0, length) == length):
+                result = json
+    file.close()
 
-    if mz_zip_reader_init_file(zadrr, file, 0) != MZ_TRUE:
-        debug("Error while opening JAR file")
-        return ""
 
-    var json = ""
-    for i in 0..<mz_zip_reader_get_num_files(zadrr):
-        let fname = get_file_name(zadrr, i)
-        if fname == "META-INF/LAUNCHER.INF":
-            if mz_zip_reader_file_stat(zadrr, i, filestat.addr) != MZ_TRUE:
-                debug "Error while locating information"
-                break
-            json.setLen(filestat.m_uncomp_size)
-            if mz_zip_reader_extract_to_mem(zadrr, i, json[0].addr,
-                    filestat.m_uncomp_size.csize, 0) != MZ_TRUE:
-                debug "Error while reading information"
-                json = ""
-            break
-
-    discard mz_zip_reader_end(zadrr)
-    return json
-
-proc findArgs*(json: string, vmargs: var seq[string], postArgs: var seq[
-        string]) =
+proc findArgs*(json: string, vmargs: var seq[string], postArgs: var seq[string]) : string =
     template populateList(args: var seq[string], json: JsonNode): void =
         if json != nil:
             for arg in json:
                 args.add(arg.getStr())
 
+    result = ""
+    if json == "" : return
     let root = parseJson(json)
+    result = root.getOrDefault("jarname").getStr("koko")
+    echo result
     populateList(vmargs, root.getOrDefault "jvmargs")
     populateList(postArgs, root.getOrDefault "args")
 
