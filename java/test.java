@@ -6,6 +6,7 @@ public class test {
         System.out.println("value1=" + System.getProperty("value1"));
         System.out.println("value2=" + System.getProperty("value2"));
         System.out.println("value3=" + System.getProperty("value3"));
-        System.out.println("self=" + System.getProperty("self.exec"));
+        System.out.println("value4=" + System.getProperty("value4"));
+        System.out.println("self.exec=" + System.getProperty("self.exec"));
     }
 }
