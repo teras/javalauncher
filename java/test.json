@@ -1,8 +1,9 @@
 {
   "version": 1,
   "jvmargs": [
-    "-Dvalue1=Parameter\n with newline\tand tab",
-    "-Dvalue2=Unicode: κλειδί Schlüssel ʃlʏsəl"
+    "-Dvalue1=Initial JVM parameter",
+    "-Dvalue2=Parameter\n with newline\tand tab",
+    "-Dvalue3=Unicode: κλειδί Schlüssel ʃlʏsəl"
   ],
   "args": [
     "some", "more", "args"

@@ -30,8 +30,6 @@ proc findArgs*(json: string, vmargs: var seq[string], postArgs: var seq[string])
     result = ""
     if json == "" : return
     let root = parseJson(json)
-    result = root.getOrDefault("jarname").getStr("koko")
-    echo result
     populateList(vmargs, root.getOrDefault "jvmargs")
     populateList(postArgs, root.getOrDefault "args")
 

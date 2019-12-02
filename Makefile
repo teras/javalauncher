@@ -41,4 +41,4 @@ test:osx
 	javac java/test.java -d target/java/classes
 	jar cmf java/MANIFEST.MF target/java/test.jar  -C target/java/classes .
 	./target/${NAME}.osx --javalauncher-creator --out target/java/test --json java/test.json
-	target/java/test -Dvalue3=third_val param1 -Dvalue4=koko param2
+	DEBUG=true target/java/test -Dvalue4=third_val param1 -Dvalue5=value_of_four param2
