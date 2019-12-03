@@ -21,15 +21,15 @@ proc loadJson*(launcherPath: string): string {.inline.} =
     file.close()
 
 
-proc findArgs*(json: string, vmargs: var seq[string], postArgs: var seq[string]) : string =
+proc parseJson*(json: string, selfName: string, vmargs: var seq[string], postArgs: var seq[string]) : string =
     template populateList(args: var seq[string], json: JsonNode): void =
         if json != nil:
             for arg in json:
                 args.add(arg.getStr())
 
-    result = ""
-    if json == "" : return
+    if json == "" : return selfName
     let root = parseJson(json)
+    result = root.getOrDefault("jar").getStr(selfName)
     populateList(vmargs, root.getOrDefault "jvmargs")
     populateList(postArgs, root.getOrDefault "args")
 

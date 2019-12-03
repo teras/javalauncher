@@ -1,5 +1,6 @@
 {
-  "version": 1,
+  "version": 3,
+  "jar": "test",
   "jvmargs": [
     "-Dvalue1=Initial JVM parameter",
     "-Dvalue2=Parameter\n with newline\tand tab",

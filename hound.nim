@@ -16,7 +16,7 @@ const PATHS = @[
 
 proc findSelf*(): string {.inline.} = getAppFilename().absolutePath().normalizedPath()
 
-proc find_java*(): string =
+proc findJava*(): string {.inline.} =
     template returnIf(location: string): untyped =
         let javabin = location & DirSep & JAVA
         if javabin.fileExists:
@@ -38,7 +38,8 @@ proc find_java*(): string =
     error "Unable to locate Java executable"
 
 
-proc find_jar*(selfName : string): string =
+proc findJar*(enclosingDir:string, name:string): string {.inline.} =
+    var name = name
     template returnIf(dir: string, jar: string): untyped =
         var file = dir & DirSep & jar
         if file.fileExists:
@@ -47,20 +48,16 @@ proc find_jar*(selfName : string): string =
         if file.fileExists:
             return file
 
-    let full = findSelf()
-    let dir = full.parentDir()
-
-    var filename = full.extractFilename()
-    if filename.endsWith(".exe"):
-        filename.delete(filename.len-3, filename.len)
-    if filename.endsWith("32") or filename.endsWith("64"):
-        filename.delete(filename.len-1, filename.len)
-        if (filename == ""):
+    if name.endsWith(".exe"):
+        name.delete(name.len-3, name.len)
+    if name.endsWith("32") or name.endsWith("64"):
+        name.delete(name.len-1, name.len)
+        if (name == ""):
             error "Not a valid executable"
-    filename.add(".jar")
+    name.add(".jar")
 
-    returnIf dir, filename
-    returnIf dir & DirSep & "lib", filename
-    returnIf dir.parentDir & DirSep & "Java", filename
-    returnIf dir.parentDir & DirSep & "lib", filename
+    returnIf enclosingDir, name
+    returnIf enclosingDir & DirSep & "lib", name
+    returnIf enclosingDir.parentDir & DirSep & "Java", name
+    returnIf enclosingDir.parentDir & DirSep & "lib", name
     error "Unable to locate JAR"

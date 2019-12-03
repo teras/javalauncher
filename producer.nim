@@ -1,10 +1,10 @@
-import os, debug, hound, carver
+import os, debug, carver
 
 proc isInProducerMode*() : bool {.inline} =
     let params = commandLineParams()
     params.len > 0 and params[0] == "--javalauncher-creator"
 
-proc produce*() =
+proc produce*(selfExec:string) =
     var params = commandLineParams()
     params.delete(0)
     var output = "javalauncher.out"
@@ -34,8 +34,7 @@ proc produce*() =
     else: debug "Producing executable " & output & (if json=="": "" else: " with JSON " & json)
 
     output = output.absolutePath().normalizedPath()
-    let selfFile = findSelf()
-    if output == selfFile:
+    if output == selfExec:
         error "Output file and source file are the same: " & output
     if output.existsFile():
         error "Output file exists: " & output
@@ -45,13 +44,13 @@ proc produce*() =
     if json != "":
         if not json.existsFile(): error "JSON file " & json & " does not exist"
         let jsonfile = json.absolutePath().normalizedPath()
-        if jsonfile == selfFile or jsonfile == output: error "JSON file should not be self referenced"
+        if jsonfile == selfExec or jsonfile == output: error "JSON file should not be self referenced"
         if jsonfile.getFileSize() >= 65535:
             error "The size of the appendable JSON file " & json & " is bigger than 64K"
         jsonData = readFile(jsonfile)
         length = jsonData.len()
 
-    writeFile(output, readFile(selfFile))
+    writeFile(output, readFile(selfExec))
     if length > 0:
         let file  = open(output, fmAppend)
         file.write(jsonData)
@@ -59,5 +58,4 @@ proc produce*() =
         file.write(char(length and 0xFF))
         file.write(SIGNATURE)
         file.close()
-    setFilePermissions(output, getFilePermissions(selfFile))
-    quit()
+    setFilePermissions(output, getFilePermissions(selfExec))

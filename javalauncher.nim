@@ -3,30 +3,28 @@ import carver
 from strutils import replace, startsWith
 
 var args: seq[string]
-var vmargs: seq[string]
+var vmArgs: seq[string]
 var postArgs: seq[string]
+let launcherPath = findSelf()
 
 if isInProducerMode():
-    produce()
-    echo "producer"
+    produce(launcherPath)
+    quit()
 
-let selfbin = findSelf()
-let json = loadJson(selfbin)
-let selfname = findArgs(json, vmargs, postArgs)
-# let jarname = findJar(json, selfbin)
+let javabin = findJava()
+let json = loadJson(launcherPath)
 
-
-let javabin = find_java()
-let jar = find_jar("")
-let java_location = javabin.parentDir
-let jar_location = jar.parentDir
-let launch_location = selfbin.parentDir()
+let launcherDir = launcherPath.parentDir()
+let jarFilename = parseJson(json, launcherPath.extractFilename(), vmArgs, postArgs)
+let jarPath = findJar(launcherDir, jarFilename)
+let javaDir = javabin.parentDir
+let jarDir = jarPath.parentDir
 
 proc asArg(item: string): string {.inline} =
     return item
-        .replace("@@JAVA_LOCATION@@", java_location)
-        .replace("@@JAR_LOCATION@@", jar_location)
-        .replace("@@LAUNCH_LOCATION@@", launch_location)
+        .replace("@@JAVA_LOCATION@@", javaDir)
+        .replace("@@JAR_LOCATION@@", jarDir)
+        .replace("@@LAUNCH_LOCATION@@", launcherDir)
 proc addArgs(args: var seq[string], list: seq[string]) {.inline} =
     for item in list:
         args.add(item.asArg)
@@ -34,16 +32,16 @@ proc addArgs(args: var seq[string], list: seq[string]) {.inline} =
 var still_starting = true
 for arg in commandLineParams():
     if still_starting and arg.startsWith("-D"):
-        vmargs.add(arg)
+        vmArgs.add(arg)
     else:
         still_starting = false
         postArgs.add(arg)
 
-# let json = extractData(selfbin)
-args.addArgs(vmargs)
-args.add("-Dself.exec=" & selfbin)
+# let json = extractData(launcherPath)
+args.addArgs(vmArgs)
+args.add("-Dself.exec=" & launcherPath)
 args.add("-jar")
-args.add(jar)
+args.add(jarPath)
 args.addArgs(postArgs)
 
 launch(javabin, args)
