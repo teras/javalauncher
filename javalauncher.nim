@@ -1,4 +1,4 @@
-import hound, os, proclauncher, producer
+import hound, os, proclauncher
 import carver
 from strutils import replace, startsWith
 
@@ -6,10 +6,6 @@ var args: seq[string]
 var vmArgs: seq[string]
 var postArgs: seq[string]
 let launcherPath = findSelf()
-
-if isInProducerMode():
-    produce(launcherPath)
-    quit()
 
 let javabin = findJava()
 let json = loadJson(launcherPath)

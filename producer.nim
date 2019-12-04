@@ -31,7 +31,7 @@ proc produce*(selfExec:string) =
             error "Unable to parse argument `" & params[0] & "`"
     
     if output == "": error "Unable to produce empty binary"
-    else: debug "Producing executable " & output & (if json=="": "" else: " with JSON " & json)
+    else: echo "Producing executable " & output & (if json=="": "" else: " with JSON " & json)
 
     output = output.absolutePath().normalizedPath()
     if output == selfExec:
