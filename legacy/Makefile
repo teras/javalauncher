@@ -65,7 +65,7 @@ ${BINBASE}.linux32:${DIST} ${SOURCE}
 	strip -s ${BINFILE}32
 
 ${BINBASE}.darwin:${DIST} ${SOURCE}
-	${CC} ${CFLAGS} -arch x86_64 -arch i386 -mmacosx-version-min=10.4 -o ${BINFILE} ${CFILES}
+	${CC} ${CFLAGS} -mmacosx-version-min=10.4 -o ${BINFILE} ${CFILES}
 	${STRIP} ${BINFILE}
 
 ${TESTFILE}:${DIST} ${BINFILE} ${JAVA_JAR}
