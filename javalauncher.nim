@@ -7,12 +7,14 @@ var vmArgs: seq[string]
 var postArgs: seq[string]
 let launcherPath = findSelf()
 let launcherDir = launcherPath.parentDir()
+let launcherBase = stripName(launcherPath.extractFilename())
 
+var json = loadJsonFromFile(launcherDir)
+if json == "":
+   json = loadJsonFromZip(findFile(launcherDir, launcherBase & ".jar"))
+
+let jarPath = findJar(launcherDir, parseJson(json, launcherBase, vmArgs, postArgs))
 let javabin = findJava()
-let json = loadJson(launcherDir)
-
-let jarFilename = parseJson(json, launcherPath.extractFilename(), vmArgs, postArgs)
-let jarPath = findJar(launcherDir, jarFilename)
 let javaDir = javabin.parentDir
 let jarDir = jarPath.parentDir
 

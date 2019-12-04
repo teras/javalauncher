@@ -37,9 +37,19 @@ target/${NAME}.64.exe:${NIMFILES}
 
 
 test:osx
+	@echo " **** Test external"
 	mkdir -p target/java/classes
 	javac java/test.java -d target/java/classes
 	jar cmf java/MANIFEST.MF target/java/test.jar  -C target/java/classes .
-	cp ./target/${NAME}.osx target/java/qlaunch
 	cp java/javalauncher.json target/java/.javalauncher.json
-	DEBUG=true target/java/qlaunch -Dvalue4=third_val param1 -Dvalue5=value_of_four param2
+	cp target/${NAME}.osx target/java/elaunch
+	DEBUG=true target/java/elaunch -Dvalue4=third_val param1 -Dvalue5=value_of_four param2
+	rm -rf target/java
+	@echo " **** Test embeded"
+	mkdir -p target/java/classes
+	javac java/test.java -d target/java/classes
+	mkdir -p target/java/classes/META-INF
+	cp java/javalauncher.json target/java/classes/META-INF/LAUNCHER.INF
+	jar cmf java/MANIFEST.MF target/java/test.jar  -C target/java/classes .
+	cp target/${NAME}.osx target/java/test
+	DEBUG=true target/java/test -Dvalue4=third_val param1 -Dvalue5=value_of_four param2

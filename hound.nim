@@ -51,7 +51,7 @@ proc findFile*(path: string, name: string): string =
     returnIf path.parentDir & DirSep & "lib", name
     return ""
 
-proc findJar*(enclosingDir:string, name:string): string {.inline.} =
+proc stripName*(name:string):string=
     var name = name
     if name.endsWith(".exe"):
         name.delete(name.len-3, name.len)
@@ -59,6 +59,8 @@ proc findJar*(enclosingDir:string, name:string): string {.inline.} =
         name.delete(name.len-1, name.len)
         if (name == ""):
             error "Not a valid executable"
-    name.add(".jar")
-    let found = findFile(enclosingDir, name)
+    return name
+
+proc findJar*(enclosingDir:string, name:string): string {.inline.} =
+    let found = findFile(enclosingDir, stripName(name) & ".jar")
     if found != "" : return found else: error "Unable to locate JAR"
