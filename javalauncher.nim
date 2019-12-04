@@ -6,11 +6,11 @@ var args: seq[string]
 var vmArgs: seq[string]
 var postArgs: seq[string]
 let launcherPath = findSelf()
+let launcherDir = launcherPath.parentDir()
 
 let javabin = findJava()
-let json = loadJson(launcherPath)
+let json = loadJson(launcherDir)
 
-let launcherDir = launcherPath.parentDir()
 let jarFilename = parseJson(json, launcherPath.extractFilename(), vmArgs, postArgs)
 let jarPath = findJar(launcherDir, jarFilename)
 let javaDir = javabin.parentDir

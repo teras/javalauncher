@@ -40,5 +40,6 @@ test:osx
 	mkdir -p target/java/classes
 	javac java/test.java -d target/java/classes
 	jar cmf java/MANIFEST.MF target/java/test.jar  -C target/java/classes .
-	./target/${NAME}.osx --javalauncher-creator --out target/java/qlaunch --json java/test.json
+	cp ./target/${NAME}.osx target/java/qlaunch
+	cp java/javalauncher.json target/java/.javalauncher.json
 	DEBUG=true target/java/qlaunch -Dvalue4=third_val param1 -Dvalue5=value_of_four param2

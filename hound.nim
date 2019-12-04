@@ -37,17 +37,22 @@ proc findJava*(): string {.inline.} =
     returnIf PATHS
     error "Unable to locate Java executable"
 
+proc findFile*(path: string, name: string): string =
+    template returnIf(dir: string, file: string): untyped =
+        var target = dir & DirSep & file
+        if target.fileExists:
+            return target
+        target = dir & DirSep & file.toLowerAscii
+        if target.fileExists:
+            return target
+    returnIf path, name
+    returnIf path & DirSep & "lib", name
+    returnIf path.parentDir & DirSep & "Java", name
+    returnIf path.parentDir & DirSep & "lib", name
+    return ""
 
 proc findJar*(enclosingDir:string, name:string): string {.inline.} =
     var name = name
-    template returnIf(dir: string, jar: string): untyped =
-        var file = dir & DirSep & jar
-        if file.fileExists:
-            return file
-        file = dir & DirSep & jar.toLowerAscii
-        if file.fileExists:
-            return file
-
     if name.endsWith(".exe"):
         name.delete(name.len-3, name.len)
     if name.endsWith("32") or name.endsWith("64"):
@@ -55,9 +60,5 @@ proc findJar*(enclosingDir:string, name:string): string {.inline.} =
         if (name == ""):
             error "Not a valid executable"
     name.add(".jar")
-
-    returnIf enclosingDir, name
-    returnIf enclosingDir & DirSep & "lib", name
-    returnIf enclosingDir.parentDir & DirSep & "Java", name
-    returnIf enclosingDir.parentDir & DirSep & "lib", name
-    error "Unable to locate JAR"
+    let found = findFile(enclosingDir, name)
+    if found != "" : return found else: error "Unable to locate JAR"

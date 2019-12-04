@@ -1,25 +1,16 @@
-import json
+import json, hound, os, debug
 
-const SIGNATURE* = "jrlc"
-const SIGLEN = SIGNATURE.len
-const SIZELEN = 2
+const LAUNCHER_INF = "javalauncher.json"
 
-proc loadJson*(launcherPath: string): string {.inline.} =
-    result = ""
-    var file  = open(launcherPath)
-    var signature = newString(SIGLEN)
-    file.setFilePos(-SIGLEN, fspEnd)
-    if (file.readChars(signature, 0, SIGLEN) == SIGLEN and signature == "jrlc"):
-        var lengthBuffer : array[SIZELEN, uint8];
-        file.setFilePos(-SIGLEN-SIZELEN, fspEnd)
-        if (file.readBytes(lengthBuffer, 0, SIZELEN) == SIZELEN):
-            let length : int = int(lengthBuffer[0]) * 256 + int(lengthBuffer[1])
-            file.setFilePos(-length-SIGLEN-SIZELEN, fspEnd)
-            var json = newString(length)
-            if (file.readChars(json, 0, length) == length):
-                result = json
-    file.close()
-
+proc loadJson*(launcherDir: string): string =
+    template returnIf(file: string): untyped =
+        let target = findFile(launcherDir, file)
+        if target.fileExists:
+            debug "Found javalauncher file at " & target
+            return readFile(target)
+    returnIf LAUNCHER_INF
+    returnIf "." & LAUNCHER_INF
+    ""
 
 proc parseJson*(json: string, selfName: string, vmargs: var seq[string], postArgs: var seq[string]) : string =
     template populateList(args: var seq[string], json: JsonNode): void =
