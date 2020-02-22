@@ -1,4 +1,4 @@
-.PHONY: clean all desktop osx linux pi windows current install run preosx prelinux prepi prewindows
+.PHONY: clean all desktop posix osx linux pi windows current install run preosx prelinux prepi prewindows
 
 # needs to be defined before include
 default:current
@@ -26,7 +26,7 @@ WINAPP:=console
 endif
 
 ifneq ($(NIMBLE),)
-NIMBLE:=nimble -y install $(NIMBLE);
+NIMBLE:=nimble refresh ; nimble -y install $(NIMBLE);
 endif
 
 ifneq ($(NIMVER),)
@@ -43,6 +43,8 @@ all:desktop pi
 
 desktop:osx linux windows
 
+posix:osx linux pi
+
 pi:target/${EXECNAME}.arm64.linux
 
 osx:target/${EXECNAME}.osx
@@ -55,7 +57,7 @@ clean:
 	rm -rf target nimcache ${NAME} ${NAME}.exe
 
 target/${EXECNAME}:${BUILDDEP}
-	${NIMVER} nim ${COMPILER} ${ALLNIMOPTS} ${NAME}
+	${NIMVER} ${NIMBLE} nim ${COMPILER} ${ALLNIMOPTS} ${NAME}
 	mkdir -p target
 	mv ${NAME} target/${EXECNAME}
 	if [ "$(DOCOMPRESS)" = "y" ] ; then upx --best target/${EXECNAME} ; fi

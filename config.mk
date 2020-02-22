@@ -2,17 +2,27 @@ NAME=javalauncher
 
 NIMVER=0.19.6
 
-NIMOPTS=--passC:-Itarget/include --passC:-Itarget/include/darwin
+NIMOPTS=--passC:-Itarget/include --passC:-Itarget/include/current
 
-preosx:copyinc
+#NIMBLE=nim_miniz@\#head
 
-prewindows:copyinc
+preosx:target/config/jni.h
+	rm -f target/include/current
+	ln -s darwin target/include/current
 
-prelinux:copyinc
+prewindows:
+	@echo "Windows target not supported"
+	@exit 1
 
-prepi:copyinc
+prelinux:target/config/jni.h
+	rm -f target/include/current
+	ln -s linux target/include/current
 
-copyinc:
+prepi:target/config/jni.h
+	rm -f target/include/current
+	ln -s linux target/include/current
+
+target/config/jni.h:
 	mkdir -p target
 	CID=`docker create teras/jdkcross` && docker cp $$CID:/bundles/include `pwd`/target && docker rm $$CID
 
