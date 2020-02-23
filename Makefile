@@ -1,4 +1,4 @@
-.PHONY: clean all desktop posix osx linux pi windows current install run preosx prelinux prepi prewindows
+.PHONY: clean all desktop posix osx linux pi windows current install install-only run preosx prelinux prepi prewindows
 
 # needs to be defined before include
 default:current
@@ -25,6 +25,10 @@ ifeq ($(WINAPP),)
 WINAPP:=console
 endif
 
+ifeq ($(ALLTARGETS),)
+ALLTARGETS:=desktop pi
+endif
+
 ifneq ($(NIMBLE),)
 NIMBLE:=nimble refresh ; nimble -y install $(NIMBLE);
 endif
@@ -39,7 +43,7 @@ BUILDDEP:=$(wildcard *.nim *.c Makefile config.mk)
 
 current:target/${EXECNAME}
 
-all:desktop pi
+all:$(ALLTARGETS)
 
 desktop:osx linux windows
 
@@ -92,13 +96,16 @@ target/${EXECNAME}.64.exe:${BUILDDEP} prewindows
 	mv ${NAME}.exe target/${EXECNAME}.64.exe
 	if [ "$(DOCOMPRESS)" = "y" ] ; then upx --best target/${EXECNAME}.64.exe ; fi
 
-install:all
-	mkdir -p ${DEST}/darwin-x86_64/ && cp target/${EXECNAME}.osx ${DEST}/darwin-x86_64/${EXECNAME}
-	mkdir -p ${DEST}/linux-x86_64/ && cp target/${EXECNAME}.linux ${DEST}/linux-x86_64/${EXECNAME}
-	mkdir -p ${DEST}/linux-arm && cp target/${EXECNAME}.arm.linux ${DEST}/linux-arm/${EXECNAME}
-	mkdir -p ${DEST}/linux-arm64 && cp target/${EXECNAME}.arm64.linux ${DEST}/linux-arm64/${EXECNAME}
-	mkdir -p ${DEST}/windows-x86_64 && cp target/${EXECNAME}.64.exe ${DEST}/windows-x86_64/${EXECNAME}.exe
-	mkdir -p ${DEST}/windows-i686 && cp target/${EXECNAME}.32.exe ${DEST}/windows-i686/${EXECNAME}.exe
+
+install: | all install-only
+
+install-only:
+	if [ -f target/${EXECNAME}.osx         ] ; then mkdir -p ${DEST}/darwin-x86_64/ && cp target/${EXECNAME}.osx ${DEST}/darwin-x86_64/${EXECNAME} ; fi
+	if [ -f target/${EXECNAME}.linux       ] ; then mkdir -p ${DEST}/linux-x86_64/  && cp target/${EXECNAME}.linux ${DEST}/linux-x86_64/${EXECNAME} ; fi
+	if [ -f target/${EXECNAME}.arm.linux   ] ; then mkdir -p ${DEST}/linux-arm      && cp target/${EXECNAME}.arm.linux ${DEST}/linux-arm/${EXECNAME} ; fi
+	if [ -f target/${EXECNAME}.arm64.linux ] ; then mkdir -p ${DEST}/linux-arm64    && cp target/${EXECNAME}.arm64.linux ${DEST}/linux-arm64/${EXECNAME} ; fi
+	if [ -f target/${EXECNAME}.64.exe      ] ; then mkdir -p ${DEST}/windows-x86_64 && cp target/${EXECNAME}.64.exe ${DEST}/windows-x86_64/${EXECNAME}.exe ; fi
+	if [ -f target/${EXECNAME}.32.exe      ] ; then mkdir -p ${DEST}/windows-i686   && cp target/${EXECNAME}.32.exe ${DEST}/windows-i686/${EXECNAME}.exe ; fi
 
 run:current
 	./target/${EXECNAME} ${RUNARGS}

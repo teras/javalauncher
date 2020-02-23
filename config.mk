@@ -4,6 +4,8 @@ NIMVER=0.19.6
 
 NIMOPTS=--passC:-Itarget/include --passC:-Itarget/include/current
 
+ALLTARGETS=posix
+
 #NIMBLE=nim_miniz@\#head
 
 preosx:target/config/jni.h

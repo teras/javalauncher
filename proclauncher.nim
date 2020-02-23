@@ -8,3 +8,6 @@ proc launch*(cmd:string, args:seq[string]) =
     discard execv(cstring(cmd), cargs)
     deallocCStringArray(cargs)
     error "Unable to launch `" & cmd & "`"
+
+{.compile: "launchjvm.c".}
+proc launchjvm* (jvmlib:cstring, jvmopts:cstringArray, c_jvmopts:int, args:cstringArray, c_args:int, mainclass:cstring ) {.importc.}

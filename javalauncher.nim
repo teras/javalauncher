@@ -2,13 +2,6 @@ import hound, os, proclauncher
 import carver
 from strutils import replace, startsWith
 
-
-{.compile: "launchjvm.c".}
-proc launchjvm (jvmlib:cstring, jvmopts:cstringArray, c_jvmopts:int, args:cstringArray, c_args:int, mainclass:cstring ) {.importc.}
-
-launchjvm "/Library/Java/JavaVirtualMachines/adoptopenjdk-8.jdk/Contents/Home/jre/lib/server/libjsig.dylib", nil, 0, nil, 0, "noclass"
-
-
 var args: seq[string]
 var vmArgs: seq[string]
 var postArgs: seq[string]
@@ -16,9 +9,10 @@ let launcherPath = findSelf()
 let launcherDir = launcherPath.parentDir()
 let launcherBase = stripName(launcherPath.extractFilename())
 
-var json = loadJsonFromFile(launcherDir)
-if json == "":
-   json = loadJsonFromZip(findFile(launcherDir, launcherBase & ".jar"))
+var json = updateJsonFromJar(loadJsonFromFile(launcherDir), findFile(launcherDir, launcherBase & ".jar"))
+
+launchjvm "/Library/Java/JavaVirtualMachines/adoptopenjdk-8.jdk/Contents/Home/jre/lib/server/libjvm.dylib", nil, 0, nil, 0, "noclass"
+
 
 let jarPath = findJar(launcherDir, parseJson(json, launcherBase, vmArgs, postArgs))
 let javabin = findJava()

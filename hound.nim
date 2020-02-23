@@ -16,7 +16,7 @@ const PATHS = @[
 
 proc findSelf*(): string {.inline.} = getAppFilename().absolutePath().normalizedPath()
 
-proc findJava*(): string {.inline.} =
+proc findJava*(): string =
     template returnIf(location: string): untyped =
         let javabin = location & DirSep & JAVA
         if javabin.fileExists:
@@ -61,6 +61,6 @@ proc stripName*(name:string):string=
             error "Not a valid executable"
     return name
 
-proc findJar*(enclosingDir:string, name:string): string {.inline.} =
+proc findJar*(enclosingDir:string, name:string): string =
     let found = findFile(enclosingDir, stripName(name) & ".jar")
     if found != "" : return found else: error "Unable to locate JAR"
