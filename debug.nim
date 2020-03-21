@@ -1,10 +1,10 @@
 import os
 
-let shouldDebug* = existsEnv("DEBUG")
+let shouldDebug* = existsEnv("JAVALAUNCHER_DEBUG")
 
 proc debug*(message: string): void =
     if shouldDebug:
-        echo message
+        echo " [DEBUG] " & message
     return
 
 proc error*(message: string): void =

@@ -11,5 +11,9 @@ public class test {
         System.out.println("value4=" + System.getProperty("value4"));
         System.out.println("value5=" + System.getProperty("value5"));
         System.out.println("self.exec=" + System.getProperty("self.exec"));
+        System.err.println("This output is on the error stream");
+        System.out.println("if the argument \"--exception\" is given, an exception will be thrown");
+        if (java.util.Arrays.asList(args).contains("--exception"))
+            throw new RuntimeException("This is a Runtime Exception");
     }
 }

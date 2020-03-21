@@ -1,6 +1,14 @@
 import debug, os, strutils
 
 const JAVA = when system.hostOS == "windows": "javaw.exe" else: "java"
+const JVMLIB = when system.hostOS == "macosx": "libjvm.dylib"
+    elif system.hostOS == "windows": "jvm.lib"
+    elif system.hostOS == "linux": "libjvm.so"
+    else: "--"
+const JLILIB = when system.hostOS == "macosx": "libjli.dylib"
+    elif system.hostOS == "windows": "jvm.lib"
+    elif system.hostOS == "linux": "libjli.so"
+    else: "--"
 
 const PATHS = @[
     "/usr/bin",
@@ -14,7 +22,61 @@ const PATHS = @[
     "/opt/shared/bin"
 ]
 
+const JVMPATHS = @[
+    "/Library/Java/JavaVirtualMachines",
+    "/usr/lib/jvm/"
+]
+
 proc findSelf*(): string {.inline.} = getAppFilename().absolutePath().normalizedPath()
+
+proc findJliLib*(): string =
+    template returnIfBoth(location:string): untyped =
+        template returnIf(loc: string): untyped =
+            let target = loc & DirSep & JLILIB
+            if target.fileExists: return target
+        returnIf location & DirSep & "lib" & DirSep & "jli"
+        returnIf location & DirSep & "bin"
+
+    let current = findSelf().parentDir()
+    returnIfBoth current.parentDir & DirSep & "jre"
+    returnIfBoth current.parentDir & DirSep & "Java"
+    returnIfBoth current & DirSep & "jre"
+    returnIfBoth current & DirSep & "Java"
+    returnIfBoth getEnv("JAVA_HOME")
+    for jvmpath in JVMPATHS:
+        for dir in walkDir jvmpath:
+            if dir.kind == PathComponent.pcDir:
+                let path = dir.path
+                when system.hostOS == "macosx":
+                    returnIfBoth path & "/Contents/Home/jre"
+                when system.hostOS == "linux":
+                    returnIfBoth path & "/jre/lib/amd64"
+    ""
+
+proc findJvmLib*(): string =
+    template returnIfBoth(location:string): untyped =
+        template returnIf(loc: string): untyped =
+            let target = loc & DirSep & JVMLIB
+            if target.fileExists: return target
+        returnIf location & DirSep & "lib" & DirSep & "server"
+        returnIf location & DirSep & "bin" & DirSep & "server"
+
+    let current = findSelf().parentDir()
+    returnIfBoth current.parentDir & DirSep & "jre"
+    returnIfBoth current.parentDir & DirSep & "Java"
+    returnIfBoth current & DirSep & "jre"
+    returnIfBoth current & DirSep & "Java"
+    returnIfBoth getEnv("JAVA_HOME") & DirSep & "jre"
+    returnIfBoth getEnv("JAVA_HOME")
+    for jvmpath in JVMPATHS:
+        for dir in walkDir jvmpath:
+            if dir.kind == PathComponent.pcDir:
+                let path = dir.path
+                when system.hostOS == "macosx":
+                    returnIfBoth path & "/Contents/Home/jre"
+                when system.hostOS == "linux":
+                    returnIfBoth path & "/jre/lib/amd64"
+    ""
 
 proc findJava*(): string =
     template returnIf(location: string): untyped =
@@ -53,7 +115,7 @@ proc findFile*(path: string, name: string): string =
 
 proc stripName*(name:string):string=
     var name = name
-    if name.endsWith(".exe"):
+    if name.toLowerAscii().endsWith(".exe"):
         name.delete(name.len-3, name.len)
     if name.endsWith("32") or name.endsWith("64"):
         name.delete(name.len-1, name.len)
@@ -63,4 +125,5 @@ proc stripName*(name:string):string=
 
 proc findJar*(enclosingDir:string, name:string): string =
     let found = findFile(enclosingDir, stripName(name) & ".jar")
-    if found != "" : return found else: error "Unable to locate JAR"
+    if found != "" : result = found else: error "Unable to locate JAR at location " & enclosingDir
+    debug "JAR path is " & result

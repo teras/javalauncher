@@ -1,32 +1,32 @@
 import hound, os, proclauncher
 import carver
-from strutils import replace, startsWith
+from strutils import startsWith
+import sequtils
 
-var args: seq[string]
-var vmArgs: seq[string]
-var postArgs: seq[string]
+let jlilib = findJliLib()
 let launcherPath = findSelf()
+if jlilib.len > 0 and isalreadyParsed():
+    launchJli(jlilib, concat(@[launcherPath], commandLineParams()))
+    # will quit here
+
+var vmArgs: seq[string]
+var appArgs: seq[string]
+var mainclass: string
+var splashscreen: string
+var classpath: string
+
+# launcher
 let launcherDir = launcherPath.parentDir()
 let launcherBase = stripName(launcherPath.extractFilename())
 
-var json = updateJsonFromJar(loadJsonFromFile(launcherDir), findFile(launcherDir, launcherBase & ".jar"))
-
-launchjvm "/Library/Java/JavaVirtualMachines/adoptopenjdk-8.jdk/Contents/Home/jre/lib/server/libjvm.dylib", nil, 0, nil, 0, "noclass"
-
-
-let jarPath = findJar(launcherDir, parseJson(json, launcherBase, vmArgs, postArgs))
-let javabin = findJava()
-let javaDir = javabin.parentDir
+# JSON
+let filejson = loadJsonFromFile(launcherDir)
+let jarName = findJarName(launcherBase, filejson)
+let jarPath = findJar(launcherDir, jarName)
 let jarDir = jarPath.parentDir
-
-proc asArg(item: string): string {.inline} =
-    return item
-        .replace("@@JAVA_LOCATION@@", javaDir)
-        .replace("@@JAR_LOCATION@@", jarDir)
-        .replace("@@LAUNCH_LOCATION@@", launcherDir)
-proc addArgs(args: var seq[string], list: seq[string]) {.inline} =
-    for item in list:
-        args.add(item.asArg)
+let json = updateJsonFromJar(jarPath, filejson)
+populateArguments(json, vmArgs, appArgs, mainclass, splashscreen, classpath, jarDir, launcherDir)
+vmArgs.add("-Dself.exec=" & launcherPath)
 
 var still_starting = true
 for arg in commandLineParams():
@@ -34,13 +34,16 @@ for arg in commandLineParams():
         vmArgs.add(arg)
     else:
         still_starting = false
-        postArgs.add(arg)
+        appArgs.add(arg)
 
-# let json = extractData(launcherPath)
-args.addArgs(vmArgs)
-args.add("-Dself.exec=" & launcherPath)
-args.add("-jar")
-args.add(jarPath)
-args.addArgs(postArgs)
-
-launch(javabin, args)
+# Call Java
+let args = concat(@[launcherPath], vmArgs, @["-jar", jarPath], appArgs)
+if jlilib != "":
+    launchJli(jlilib, args)
+else:
+    let javalib = findJvmLib()
+    if javalib != "":
+        launchjvm(javalib, vmArgs, jarPath, appArgs, mainclass, splashscreen, classpath)
+    else:
+        let javabin = findJava()
+        launchJre(javabin, args)
