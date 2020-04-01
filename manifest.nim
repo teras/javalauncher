@@ -1,4 +1,4 @@
-import tables, strutils, json, debug
+import tables, strutils, json
 export tables
 
 proc parseManifestLine(line:string, dict:TableRef[string,string]) =

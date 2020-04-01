@@ -1,6 +1,6 @@
 NAME=javalauncher
 
-NIMVER=0.19.6
+NIMVER=1.0.6
 
 NIMOPTS:=--passC:-Iinclude
 
@@ -12,9 +12,11 @@ WINDOWSNIMOPTS:=--passC:-Iinclude/windows
 
 ALLTARGETS=osx linux
 
-#NIMBLE=nim_miniz@\#head
+NIMBLE=nim_miniz
 
-test:debug
+COMPRESS=true
+
+test:local
 	@echo
 	@echo " **** Test external"
 	mkdir -p target/java/classes

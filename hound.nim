@@ -30,10 +30,10 @@ const JVMPATHS = @[
 proc findSelf*(): string {.inline.} = getAppFilename().absolutePath().normalizedPath()
 
 proc findJliLib*(): string =
+    template returnIf(loc: string): untyped =
+        let target = loc & DirSep & JLILIB
+        if target.fileExists: return target
     template returnIfBoth(location:string): untyped =
-        template returnIf(loc: string): untyped =
-            let target = loc & DirSep & JLILIB
-            if target.fileExists: return target
         returnIf location & DirSep & "lib" & DirSep & "jli"
         returnIf location & DirSep & "bin"
 
@@ -54,10 +54,10 @@ proc findJliLib*(): string =
     ""
 
 proc findJvmLib*(): string =
+    template returnIf(loc: string): untyped =
+        let target = loc & DirSep & JVMLIB
+        if target.fileExists: return target
     template returnIfBoth(location:string): untyped =
-        template returnIf(loc: string): untyped =
-            let target = loc & DirSep & JVMLIB
-            if target.fileExists: return target
         returnIf location & DirSep & "lib" & DirSep & "server"
         returnIf location & DirSep & "bin" & DirSep & "server"
 

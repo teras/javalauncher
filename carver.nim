@@ -5,39 +5,19 @@ const LAUNCHER_FILE = "javalauncher.json"
 const LAUNCHER_INF = "META-INF/LAUNCHER.INF"
 const MANIFEST_MF = "META-INF/MANIFEST.MF"
 
-proc getFilename(zadrr: ptr mz_zip_archive, i: mz_uint): string =
-    var size = zadrr.mz_zip_reader_get_filename(i.mz_uint, result, 0)
-    result.setLen(size.int)
-    doAssert zadrr.mz_zip_reader_get_filename(i.mz_uint, result,
-            size) > 0.mz_uint
-    # drop trailing byte.
-    result = result[0..<result.high]
-
-
-proc readZipEntry(ftype: string, zadrr: ptr mz_zip_archive, zipIndex: mz_uint): string =
-    var filestat: mz_zip_archive_file_stat
-    if mz_zip_reader_file_stat(zadrr, zipIndex, filestat.addr) != MZ_TRUE:
-        error "Error while locating " & ftype & " information"
-    result.setLen(filestat.m_uncomp_size)
-    if mz_zip_reader_extract_to_mem(zadrr, zipIndex, result[0].addr,
-            filestat.m_uncomp_size.csize, 0) != MZ_TRUE:
-        error "Error while reading information"
-
 proc updateJsonFromJar*(file: string, fileJson: JsonNode): JsonNode =
-    var zip: mz_zip_archive
     result = fileJson
-    let zadrr: ptr mz_zip_archive = zip.addr
-    if mz_zip_reader_init_file(zadrr, file, 0) != MZ_TRUE:
+    var manifest: TableRef[string, string]
+    var zip:Zip
+    if not zip.open(file):
         debug("Error while opening JAR file " & file)
         return nil
-    var manifest: TableRef[string, string]
-    for i in 0..<mz_zip_reader_get_num_files(zadrr):
-        let fname = getFilename(zadrr, i)
+    for i, fname in zip:
         if fname == LAUNCHER_INF and result == nil:
-            result = parseJson(readZipEntry("JSON", zadrr, i))
+            result = parseJson(zip.extract_file_to_string(fname))
         elif fname == MANIFEST_MF:
-            manifest = parseManifest(readZipEntry("manifest", zadrr, i))
-    discard mz_zip_reader_end(zadrr)
+            manifest = parseManifest(zip.extract_file_to_string(fname))
+    zip.close()
     if result == nil: result = newJObject()
     result.injectManifest(manifest)
     debug "Jar JSON: " & $result
