@@ -1,13 +1,17 @@
-.PHONY: clean all desktop posix osx linux pi windows current install install-only run
+.PHONY: clean all desktop posix osx linux pi windows local install install-only run
 
 # needs to be defined before include
-default:debug
+default:local
 
 include config.mk
 
 DEST:=~/Works/System/arch
 
+ifeq ($(DEBUG),true)
+BASENIMOPTS=-d:VERSION=$(VERSION) --opt:size $(NIMOPTS)
+else
 BASENIMOPTS=-d:release -d:VERSION=$(VERSION) --opt:size $(NIMOPTS)
+endif
 
 ifeq ($(EXECNAME),)
 EXECNAME:=$(NAME)
@@ -41,7 +45,7 @@ DOCOMPRESS:=$(shell echo $(COMPRESS) | tr A-Z a-z | cut -c1-1)
 
 BUILDDEP:=$(wildcard *.nim *.c *.m Makefile config.mk)
 
-debug:target/${EXECNAME}
+local:target/${EXECNAME}
 
 all:$(ALLTARGETS)
 
@@ -64,38 +68,38 @@ target/${EXECNAME}:${BUILDDEP}
 	${NIMVER} ${NIMBLE} nim ${COMPILER} ${BASENIMOPTS} ${OSXNIMOPTS} ${NAME}
 	mkdir -p target
 	mv ${NAME} target/${EXECNAME}
-	if [ "$(DOCOMPRESS)" = "y" ] ; then upx --best target/${EXECNAME} ; fi
+	if [ "$(DOCOMPRESS)" = "t" ] ; then upx --best target/${EXECNAME} ; fi
 	cp target/${EXECNAME} target/${EXECNAME}.osx
 
 target/${EXECNAME}.osx:${BUILDDEP}
 	mkdir -p target
 	docker run --rm -v `pwd`:/usr/src/app -w /usr/src/app teras/nimcross bash -c "${NIMVER} ${NIMBLE} nim ${COMPILER} ${BASENIMOPTS} ${OSXNIMOPTS} --os:macosx --passC:'-mmacosx-version-min=10.7 -gfull' --passL:'-mmacosx-version-min=10.7 -dead_strip' ${NAME} && x86_64-apple-darwin19-strip ${NAME}"
 	mv ${NAME} target/${EXECNAME}.osx
-	if [ "$(DOCOMPRESS)" = "y" ] ; then upx --best target/${EXECNAME}.osx ; fi
+	if [ "$(DOCOMPRESS)" = "t" ] ; then upx --best target/${EXECNAME}.osx ; fi
 
 target/${EXECNAME}.linux:${BUILDDEP}
 	mkdir -p target
 	docker run --rm -v `pwd`:/usr/src/app -w /usr/src/app teras/nimcross bash -c "${NIMVER} ${NIMBLE} nim ${COMPILER} ${BASENIMOPTS} ${LINUXNIMOPTS} ${NAME} && strip ${NAME}"
 	mv ${NAME} target/${EXECNAME}.linux
-	if [ "$(DOCOMPRESS)" = "y" ] ; then upx --best target/${EXECNAME}.linux ; fi
+	if [ "$(DOCOMPRESS)" = "t" ] ; then upx --best target/${EXECNAME}.linux ; fi
 
 target/${EXECNAME}.arm64.linux:${BUILDDEP}
 	mkdir -p target
 	docker run --rm -v `pwd`:/usr/src/app -w /usr/src/app teras/nimcross bash -c "${NIMVER} ${NIMBLE} nim ${COMPILER} ${BASENIMOPTS} ${PINIMOPTS} --cpu:arm --os:linux ${NAME} && arm-linux-gnueabi-strip ${NAME}"
 	mv ${NAME} target/${EXECNAME}.arm.linux
-	if [ "$(DOCOMPRESS)" = "y" ] ; then upx --best target/${EXECNAME}.arm.linux ; fi
+	if [ "$(DOCOMPRESS)" = "t" ] ; then upx --best target/${EXECNAME}.arm.linux ; fi
 	docker run --rm -v `pwd`:/usr/src/app -w /usr/src/app teras/nimcross bash -c "${NIMVER} ${NIMBLE} nim ${COMPILER} ${BASENIMOPTS} ${PINIMOPTS} --cpu:arm64 --os:linux ${NAME} && aarch64-linux-gnu-strip ${NAME}"
 	mv ${NAME} target/${EXECNAME}.arm64.linux
-	if [ "$(DOCOMPRESS)" = "y" ] ; then upx --best target/${EXECNAME}.arm64.linux ; fi
+	if [ "$(DOCOMPRESS)" = "t" ] ; then upx --best target/${EXECNAME}.arm64.linux ; fi
 
 target/${EXECNAME}.64.exe:${BUILDDEP}
 	mkdir -p target
 	docker run --rm -v `pwd`:/usr/src/app -w /usr/src/app teras/nimcross bash -c "${NIMVER} ${NIMBLE} nim ${COMPILER} ${BASENIMOPTS} ${WINDOWSNIMOPTS} -d:mingw --cpu:i386  --app:${WINAPP} ${NAME} && i686-w64-mingw32-strip   ${NAME}.exe"
 	mv ${NAME}.exe target/${EXECNAME}.32.exe
-	if [ "$(DOCOMPRESS)" = "y" ] ; then upx --best target/${EXECNAME}.32.exe ; fi
+	if [ "$(DOCOMPRESS)" = "t" ] ; then upx --best target/${EXECNAME}.32.exe ; fi
 	docker run --rm -v `pwd`:/usr/src/app -w /usr/src/app teras/nimcross bash -c "${NIMVER} ${NIMBLE} nim ${COMPILER} ${BASENIMOPTS} ${WINDOWSNIMOPTS} -d:mingw --cpu:amd64 --app:${WINAPP} ${NAME} && x86_64-w64-mingw32-strip ${NAME}.exe"
 	mv ${NAME}.exe target/${EXECNAME}.64.exe
-	if [ "$(DOCOMPRESS)" = "y" ] ; then upx --best target/${EXECNAME}.64.exe ; fi
+	if [ "$(DOCOMPRESS)" = "t" ] ; then upx --best target/${EXECNAME}.64.exe ; fi
 
 
 install: | all install-only
@@ -108,5 +112,5 @@ install-only:
 	if [ -f target/${EXECNAME}.64.exe      ] ; then mkdir -p ${DEST}/windows-x86_64 && cp target/${EXECNAME}.64.exe ${DEST}/windows-x86_64/${EXECNAME}.exe ; fi
 	if [ -f target/${EXECNAME}.32.exe      ] ; then mkdir -p ${DEST}/windows-i686   && cp target/${EXECNAME}.32.exe ${DEST}/windows-i686/${EXECNAME}.exe ; fi
 
-run:debug
+run:local
 	./target/${EXECNAME} ${RUNARGS}
