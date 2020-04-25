@@ -1,4 +1,4 @@
-import hound, os, proclauncher
+import hound, os, proclauncher, hidpi
 import carver
 from strutils import startsWith
 import sequtils
@@ -35,6 +35,9 @@ for arg in commandLineParams():
     else:
         still_starting = false
         appArgs.add(arg)
+
+if getHiDpi() > 140 and not vmArgs.hasDpiArg:
+        vmArgs.add("-Dsun.java2d.uiScale=2")
 
 # Call Java
 let args = concat(@[launcherPath], vmArgs, @["-jar", jarPath], appArgs)
