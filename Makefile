@@ -1,4 +1,4 @@
-.PHONY: clean all desktop posix osx linux pi windows local install install-only run docker
+.PHONY: clean all desktop posix osx linux pi windows win32 win64 local install install-only run docker
 
 # needs to be defined before include
 default:local
@@ -66,19 +66,24 @@ osx:target/${EXECNAME}.osx
 
 linux:target/${EXECNAME}.linux
 
-windows:target/${EXECNAME}.64.exe
+windows:win32 win64
+
+win32:target/${EXECNAME}.32.exe
+
+win64:target/${EXECNAME}.64.exe
 
 clean:
 	rm -rf target docker.tmp nimcache ${NAME} ${NAME}.exe
 
 docker:
-	@if [ "${NIMBLE}" = "" ] ; then echo "No docker needed" ; exit 1 ; fi
-	rm -rf docker.tmp
-	mkdir docker.tmp
-	echo >docker.tmp/Dockerfile "FROM teras/nimcross"
-	echo >>docker.tmp/Dockerfile "RUN ${NIMBLE}"
-	cd docker.tmp ; docker build -t ${DOCKERNAME} .
-	rm -rf docker.tmp
+	@if [ "${NIMBLE}" != "" ] ; then \
+	rm -rf docker.tmp && \
+	mkdir docker.tmp && \
+	echo >docker.tmp/Dockerfile "FROM teras/nimcross" && \
+	echo >>docker.tmp/Dockerfile "RUN ${NIMBLE}" && \
+	cd docker.tmp ; docker build -t ${DOCKERNAME} . && \
+	rm -rf docker.tmp ; \
+	fi
 
 target/${EXECNAME}:${BUILDDEP}
 	nim ${COMPILER} ${BASENIMOPTS} ${OSXNIMOPTS} ${NAME}
@@ -103,16 +108,19 @@ target/${EXECNAME}.aarch64.linux:${BUILDDEP}
 	mkdir -p target
 	docker run --rm -v `pwd`:/usr/src/app -w /usr/src/app ${DOCKERNAME} bash -c "${NIMVER} nim ${COMPILER} ${BASENIMOPTS} ${PINIMOPTS} --cpu:arm --os:linux ${NAME} && arm-linux-gnueabi-strip ${NAME}"
 	mv ${NAME} target/${EXECNAME}.arm.linux
-	if [ "$(DOCOMPRESS)" = "t" ] ; then upx --best target/${EXECNAME}.arm.linux ; fi
+	#if [ "$(DOCOMPRESS)" = "t" ] ; then upx --best target/${EXECNAME}.arm.linux ; fi
 	docker run --rm -v `pwd`:/usr/src/app -w /usr/src/app ${DOCKERNAME} bash -c "${NIMVER} nim ${COMPILER} ${BASENIMOPTS} ${PINIMOPTS} --cpu:arm64 --os:linux ${NAME} && aarch64-linux-gnu-strip ${NAME}"
 	mv ${NAME} target/${EXECNAME}.aarch64.linux
 	if [ "$(DOCOMPRESS)" = "t" ] ; then upx --best target/${EXECNAME}.aarch64.linux ; fi
 
-target/${EXECNAME}.64.exe:${BUILDDEP}
+target/${EXECNAME}.32.exe:${BUILDDEP}
 	mkdir -p target
 	docker run --rm -v `pwd`:/usr/src/app -w /usr/src/app ${DOCKERNAME} bash -c "${NIMVER} nim ${COMPILER} ${BASENIMOPTS} ${WINDOWSNIMOPTS} -d:mingw --cpu:i386  --app:${WINAPP} ${NAME} && i686-w64-mingw32-strip   ${NAME}.exe"
 	mv ${NAME}.exe target/${EXECNAME}.32.exe
 	if [ "$(DOCOMPRESS)" = "t" ] ; then upx --best target/${EXECNAME}.32.exe ; fi
+
+target/${EXECNAME}.64.exe:${BUILDDEP}
+	mkdir -p target
 	docker run --rm -v `pwd`:/usr/src/app -w /usr/src/app ${DOCKERNAME} bash -c "${NIMVER} nim ${COMPILER} ${BASENIMOPTS} ${WINDOWSNIMOPTS} -d:mingw --cpu:amd64 --app:${WINAPP} ${NAME} && x86_64-w64-mingw32-strip ${NAME}.exe"
 	mv ${NAME}.exe target/${EXECNAME}.64.exe
 	if [ "$(DOCOMPRESS)" = "t" ] ; then upx --best target/${EXECNAME}.64.exe ; fi
