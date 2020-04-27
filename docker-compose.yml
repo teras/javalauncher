@@ -1,0 +1,8 @@
+version: '3'
+
+services:
+    nimcross:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        image: teras/javalauncher
