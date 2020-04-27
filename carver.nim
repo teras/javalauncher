@@ -6,21 +6,24 @@ const LAUNCHER_INF = "META-INF/LAUNCHER.INF"
 const MANIFEST_MF = "META-INF/MANIFEST.MF"
 
 proc updateJsonFromJar*(file: string, fileJson: JsonNode): JsonNode =
-    result = fileJson
-    var manifest: TableRef[string, string]
-    var zip:Zip
-    if not zip.open(file):
-        debug("Error while opening JAR file " & file)
-        return nil
-    for i, fname in zip:
-        if fname == LAUNCHER_INF and result == nil:
-            result = parseJson(zip.extract_file_to_string(fname))
-        elif fname == MANIFEST_MF:
-            manifest = parseManifest(zip.extract_file_to_string(fname))
-    zip.close()
-    if result == nil: result = newJObject()
-    result.injectManifest(manifest)
-    debug "Jar JSON: " & $result
+    when system.hostOS == "windows":
+        return if fileJson == nil: newJObject() else: fileJson
+    else:
+        result = fileJson
+        var manifest: TableRef[string, string]
+        var zip:Zip
+        if not zip.open(file):
+            debug("Error while opening JAR file " & file)
+            return nil
+        for i, fname in zip:
+            if fname == LAUNCHER_INF and result == nil:
+                result = parseJson(zip.extract_file_to_string(fname))
+            elif fname == MANIFEST_MF:
+                manifest = parseManifest(zip.extract_file_to_string(fname))
+        zip.close()
+        if result == nil: result = newJObject()
+        if manifest != nil: result.injectManifest(manifest)
+        debug "Jar JSON: " & $result
 
 proc loadJsonFromFile*(launcherDir: string): JsonNode =
     template returnIf(file: string): untyped =

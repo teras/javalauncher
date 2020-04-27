@@ -1,6 +1,17 @@
 #include <jni.h>
 #include <string.h>
+
+#ifdef _WIN32
+#include <windows.h>
+#define LIBTYPE HINSTANCE
+#define OPENLIB(libname) LoadLibrary(TEXT(libname))
+#define LIBFUNC(lib, fn) GetProcAddress((lib), (fn))
+#else
 #include <dlfcn.h>
+#define LIBTYPE void*
+#define OPENLIB(libname) dlopen((libname), RTLD_LAZY)
+#define LIBFUNC(lib, fn) dlsym((lib), (fn))
+#endif
 
 typedef int (JNICALL *JLI_Launch_f)(int argc, char ** argv,
                                     int jargc, const char** jargv,
@@ -17,16 +28,16 @@ typedef int (JNICALL *JLI_Launch_f)(int argc, char ** argv,
 typedef jint (*JNI_CreateJavaVM_f)(JavaVM **, void **, void *);
 
 int launchjli(char *jlilib, int argc, char** argv) {
-	 void *libJLI = dlopen(jlilib, RTLD_LAZY);
+	 LIBTYPE libJLI = OPENLIB(jlilib);
 	if (!libJLI)
 	{
-		printf("[%s] Unable to load library: %s\n", __FILE__, dlerror());
+		printf("Unable to load library %s\n", __FILE__,jlilib);
 		return 1;
 	}
-	JLI_Launch_f JLI_Launch = dlsym(libJLI, "JLI_Launch");
+	JLI_Launch_f JLI_Launch = LIBFUNC(libJLI, "JLI_Launch");
 	if (!JLI_Launch)
 	{
-		printf("[%s] Unable to get symbol: %s\n", __FILE__, dlerror());
+		printf("Unable to get symbol JLI_Launch from library %s\n", jlilib);
 		return 1;
 	}
 	int result = JLI_Launch(argc, argv,
@@ -58,16 +69,16 @@ int launchjvmExec(char *jvmlib, char **jvmopts, int c_jvmopts, char **args, int 
 	vm_args.options = options;
 	vm_args.nOptions = c_jvmopts;
 
-	void *lib_handle = dlopen(jvmlib, RTLD_LOCAL | RTLD_LAZY);
+	LIBTYPE lib_handle = OPENLIB(jvmlib);
 	if (!lib_handle)
 	{
-		printf("[%s] Unable to load library: %s\n", __FILE__, dlerror());
+		printf("Unable to load library %s\n", jvmlib);
 		return 1;
 	}
-	JNI_CreateJavaVM_f JNI_CreateJavaVM = dlsym(lib_handle, "JNI_CreateJavaVM");
+	JNI_CreateJavaVM_f JNI_CreateJavaVM = LIBFUNC(lib_handle, "JNI_CreateJavaVM");
 	if (!JNI_CreateJavaVM)
 	{
-		printf("[%s] Unable to get symbol: %s\n", __FILE__, dlerror());
+		printf("Unable to get symbol JNI_CreateJavaVM from library %s\n", jvmlib);
 		return 1;
 	}
 

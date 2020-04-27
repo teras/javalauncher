@@ -1,7 +1,5 @@
 NAME=javalauncher
 
-NIMVER=1.0.6
-
 NIMOPTS:=--passC:-Iinclude
 
 OSXNIMOPTS:=--passC:-Iinclude/darwin
@@ -14,7 +12,9 @@ ALLTARGETS=osx linux
 
 NIMBLE=nim_miniz
 
-COMPRESS=true
+#COMPRESS=true
+
+WINAPP:=gui
 
 test:local
 	@echo

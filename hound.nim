@@ -116,7 +116,7 @@ proc findFile*(path: string, name: string): string =
 proc stripName*(name:string):string=
     var name = name
     if name.toLowerAscii().endsWith(".exe"):
-        name.delete(name.len-3, name.len)
+        name.delete(name.len-4, name.len)
     if name.endsWith("32") or name.endsWith("64"):
         name.delete(name.len-1, name.len)
         if (name == ""):

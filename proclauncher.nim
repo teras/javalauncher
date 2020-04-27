@@ -1,4 +1,4 @@
-import posix, debug, sequtils, strutils, os, system
+import posix, debug, sequtils, strutils, os, system, winres
 
 const CP_SEP = when system.hostOS == "windows": ";" else: ":"
 
@@ -46,6 +46,10 @@ proc launchJli*(jlilib:string, args:seq[string]) =
     quit(exitcode)
 
 proc launchJre*(javabin:string, args:seq[string]) =
+    when system.hostOS == "windows":
+        var args = args
+        for i in 0..<args.len:
+            args[i] = args[i].quoteShellWindows
     debug "Launching (java): " & javabin & " " & $args
     let cargs:cstringArray = allocCStringArray(args)
     discard execv(cstring(javabin), cargs)
