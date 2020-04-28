@@ -3,10 +3,12 @@ import carver
 from strutils import startsWith
 import sequtils
 
+let clp = commandLineParams()
+
 let jlilib = findJliLib()
 let launcherPath = findSelf()
-if jlilib.len > 0 and isalreadyParsed():
-    launchJli(jlilib, concat(@[launcherPath], commandLineParams()))
+if jlilib.len > 0 and isalreadyParsed(clp):
+    launchJli(jlilib, concat(@[launcherPath], clp))
     # will quit here
 
 var vmArgs: seq[string]
@@ -29,7 +31,7 @@ populateArguments(json, vmArgs, appArgs, mainclass, splashscreen, classpath, jar
 vmArgs.add("-Dself.exec=" & launcherPath)
 
 var still_starting = true
-for arg in commandLineParams():
+for arg in clp:
     if still_starting and arg.startsWith("-D"):
         vmArgs.add(arg)
     else:

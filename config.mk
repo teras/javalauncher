@@ -16,6 +16,10 @@ NIMBLE=nim_miniz
 
 WINAPP:=gui
 
+push:
+	docker-compose build
+	docker-compose push
+
 test:local
 	@echo
 	@echo " **** Test external"

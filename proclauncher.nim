@@ -6,8 +6,8 @@ const CP_SEP = when system.hostOS == "windows": ";" else: ":"
 proc launchjvm (jvmlib:cstring, vmArgs:cstringArray, vmArgs_size:int, appArgs:cstringArray, appArgs_size:int, mainclass:cstring ) :int {.importc.}
 proc launchjli(jlilib:cstring, argc:int, argv:cstringArray) :int {.importc.}
 
-proc isalreadyParsed*() : bool =
-    for arg in commandLineParams():
+proc isalreadyParsed*(args:seq[string]) : bool =
+    for arg in args:
         if arg.startsWith("-Dself.exec="):
             debug "Will rerun using JLI library"
             return true

@@ -1,5 +1,6 @@
 import os, strutils
 
+# START: User configuration
 const APPVERSION {.strdefine.} = "1.0"
 const LONGVERSION {.strdefine.} = "1.0.0.0"
 
@@ -7,26 +8,19 @@ const COMPANY {.strdefine.} = "Company Name"
 const DESCRIPTION {.strdefine.} = "Application description"
 const COPYRIGHT {.strdefine.} = COMPANY
 const APPNAME {.strdefine.} = "app"
-const APPFILE {.strdefine.} = APPNAME & ".exe"
-
-const ICON {.strdefine.} = "frame.ico"
-
-
-const ICONRC = 
-    if ICON != "" and ICON.fileExists:
-        writeFile("target/appicon.ico", readFile(ICON))
-        "101 ICON \"appicon.ico\"\n"
-    else :
-        ""
+# END: User configuration
 
 const BINVERSION = LONGVERSION.replace('.', ',')
-const INTERNALNAME = if APPFILE.endsWith(".exe"): APPFILE.substr(0,APPFILE.len-5) else:APPFILE
+const INTERNALNAME = APPNAME.toLowerAscii
+const FILENAME = INTERNALNAME & ".exe"
 
+const ICONRC = if "target/appicon.ico".fileExists: "101 ICON \"appicon.ico\"\n" else:""
 const VERSIONRC = """
 1 VERSIONINFO
 FILEVERSION     """ & BINVERSION  & """
 
-PRODUCTVERSION  1,0,0,0
+PRODUCTVERSION  """ & BINVERSION  & """
+
 BEGIN
   BLOCK "StringFileInfo"
   BEGIN
@@ -37,7 +31,7 @@ BEGIN
       VALUE "FileVersion", """" & APPVERSION & """"
       VALUE "InternalName", """" & INTERNALNAME & """"
       VALUE "LegalCopyright", """" & COPYRIGHT & """"
-      VALUE "OriginalFilename", """" & APPFILE & """"
+      VALUE "OriginalFilename", """" & FILENAME & """"
       VALUE "ProductName", """" & APPNAME & """"
       VALUE "ProductVersion", """" & APPVERSION & """"
     END
