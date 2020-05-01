@@ -1,7 +1,8 @@
 import nim_miniz, debug, json, hound, os, manifest
 from strutils import replace
 
-const LAUNCHER_FILE = "javalauncher.json"
+const LAUNCHER_FILE = "javalauncher"
+const LAUNCHER_EXT = "json"
 const LAUNCHER_INF = "META-INF/LAUNCHER.INF"
 const MANIFEST_MF = "META-INF/MANIFEST.MF"
 
@@ -27,7 +28,7 @@ proc updateJsonFromJar*(file: string, fileJson: JsonNode): JsonNode =
 
 proc loadJsonFromFile*(launcherDir: string): JsonNode =
     template returnIf(file: string): untyped =
-        let target = findFile(launcherDir, file)
+        let target = findFile(launcherDir, file, LAUNCHER_EXT)
         if target.fileExists:
             debug "Found javalauncher file at " & target
             result = parseJson(readFile(target))

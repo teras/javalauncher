@@ -99,19 +99,34 @@ proc findJava*(): string =
     returnIf PATHS
     error "Unable to locate Java executable"
 
-proc findFile*(path: string, name: string): string =
+proc findFile*(path: string, name: string, ext:string, fuzzy=false): string =
     template returnIf(dir: string, file: string): untyped =
-        var target = dir & DirSep & file
-        if target.fileExists:
-            return target
-        target = dir & DirSep & file.toLowerAscii
-        if target.fileExists:
-            return target
+        if dir.dirExists:
+            if fuzzy:
+                let cext = "." & ext
+                var bestMatch:string = ""
+                for (comp,path) in dir.walkDir:
+                    if comp == pcFile:
+                        let filename = path.extractFilename.toLowerAscii
+                        if filename.startsWith(file) and filename.endsWith(cext):
+                            if bestMatch == "" or bestMatch.len > path.len:
+                                bestMatch = path
+                if bestMatch != "" :
+                    return bestMatch
+            else:
+                let fullname = file & "." & ext
+                var target = dir & DirSep & fullname
+                if target.fileExists:
+                    return target
+                target = dir & DirSep & fullname.toLowerAscii
+                if target.fileExists:
+                    return target
     returnIf path, name
     returnIf path & DirSep & "lib", name
     returnIf path.parentDir & DirSep & "Java", name
     returnIf path.parentDir & DirSep & "lib", name
-    return ""
+    returnIf path.parentDir & DirSep & "Resources" & DirSep & "Java", name
+    return if fuzzy: "" else: findFile(path, name, ext, true)
 
 proc stripName*(name:string):string=
     var name = name
@@ -124,6 +139,6 @@ proc stripName*(name:string):string=
     return name
 
 proc findJar*(enclosingDir:string, name:string): string =
-    let found = findFile(enclosingDir, stripName(name) & ".jar")
-    if found != "" : result = found else: error "Unable to locate JAR at location " & enclosingDir
+    let found = findFile(enclosingDir, stripName(name) , "jar")
+    if found != "" : result = found else: error "Unable to locate JAR around location " & enclosingDir
     debug "JAR path is " & result

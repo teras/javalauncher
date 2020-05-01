@@ -25,6 +25,7 @@ xclean:
 	cd launchercreator ; make clean
 
 test:local
+	@set -e
 	@echo
 	@echo " **** Test external"
 	mkdir -p target/java/classes
