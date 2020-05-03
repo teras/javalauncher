@@ -4,10 +4,10 @@ import os, strutils
 const APPVERSION {.strdefine.} = "1.0"
 const LONGVERSION {.strdefine.} = "1.0.0.0"
 
-const COMPANY {.strdefine.} = "Company Name"
-const DESCRIPTION {.strdefine.} = "Application description"
+const APPNAME {.strdefine.} = "Application"
+const COMPANY {.strdefine.} = "Company"
+const DESCRIPTION {.strdefine.} = APPNAME
 const COPYRIGHT {.strdefine.} = COMPANY
-const APPNAME {.strdefine.} = "app"
 # END: User configuration
 
 const BINVERSION = LONGVERSION.replace('.', ',')
