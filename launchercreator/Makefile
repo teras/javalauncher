@@ -10,7 +10,11 @@ DEST:=~/Works/System/bin/arch
 ifeq ($(DEBUG),true)
 BASENIMOPTS=-d:VERSION=$(VERSION) --opt:size $(NIMOPTS)
 else
+ifeq ($(DEBUG),full)
+BASENIMOPTS=-d:VERSION=$(VERSION) --debuginfo --linedir:on $(NIMOPTS)
+else
 BASENIMOPTS=-d:release -d:VERSION=$(VERSION) --opt:size $(NIMOPTS)
+endif
 endif
 
 ifeq ($(EXECNAME),)
@@ -129,12 +133,14 @@ target/${EXECNAME}.64.exe:${BUILDDEP}
 install: | all install-only
 
 install-only:
-	if [ -f target/${EXECNAME}.osx         ] ; then mkdir -p ${DEST}/darwin-x86_64/ && cp target/${EXECNAME}.osx ${DEST}/darwin-x86_64/${EXECNAME} ; fi
-	if [ -f target/${EXECNAME}.linux       ] ; then mkdir -p ${DEST}/linux-x86_64/  && cp target/${EXECNAME}.linux ${DEST}/linux-x86_64/${EXECNAME} ; fi
-	if [ -f target/${EXECNAME}.arm.linux   ] ; then mkdir -p ${DEST}/linux-arm      && cp target/${EXECNAME}.arm.linux ${DEST}/linux-arm/${EXECNAME} ; fi
-	if [ -f target/${EXECNAME}.aarch64.linux ] ; then mkdir -p ${DEST}/linux-aarch64    && cp target/${EXECNAME}.aarch64.linux ${DEST}/linux-aarch64/${EXECNAME} ; fi
-	if [ -f target/${EXECNAME}.64.exe      ] ; then mkdir -p ${DEST}/windows-x86_64 && cp target/${EXECNAME}.64.exe ${DEST}/windows-x86_64/${EXECNAME}.exe ; fi
-	if [ -f target/${EXECNAME}.32.exe      ] ; then mkdir -p ${DEST}/windows-i686   && cp target/${EXECNAME}.32.exe ${DEST}/windows-i686/${EXECNAME}.exe ; fi
+	set -e ; mkdir -p ${DEST}/all
+	set -e ; rm -rf ${DEST}/all/${EXECNAME}.* ; rm -f ${DEST}/darwin-x86_64/${EXECNAME} ${DEST}/linux-x86_64/${EXECNAME} ${DEST}/linux-arm/${EXECNAME} ${DEST}/linux-aarch64/${EXECNAME} ${DEST}/windows-x86_64/${EXECNAME}.exe ${DEST}/windows-i686/${EXECNAME}.exe
+	set -e ; if [ -f target/${EXECNAME}.osx           ] ; then mkdir -p ${DEST}/darwin-x86_64/ && cp target/${EXECNAME}.osx           ${DEST}/all/ && ln -s ../all/${EXECNAME}.osx           ${DEST}/darwin-x86_64/${EXECNAME}      ; fi
+	set -e ; if [ -f target/${EXECNAME}.linux         ] ; then mkdir -p ${DEST}/linux-x86_64/  && cp target/${EXECNAME}.linux         ${DEST}/all/ && ln -s ../all/${EXECNAME}.linux         ${DEST}/linux-x86_64/${EXECNAME}       ; fi
+	set -e ; if [ -f target/${EXECNAME}.arm.linux     ] ; then mkdir -p ${DEST}/linux-arm      && cp target/${EXECNAME}.arm.linux     ${DEST}/all/ && ln -s ../all/${EXECNAME}.arm.linux     ${DEST}/linux-arm/${EXECNAME}          ; fi
+	set -e ; if [ -f target/${EXECNAME}.aarch64.linux ] ; then mkdir -p ${DEST}/linux-aarch64  && cp target/${EXECNAME}.aarch64.linux ${DEST}/all/ && ln -s ../all/${EXECNAME}.aarch64.linux ${DEST}/linux-aarch64/${EXECNAME}      ; fi
+	set -e ; if [ -f target/${EXECNAME}.64.exe        ] ; then mkdir -p ${DEST}/windows-x86_64 && cp target/${EXECNAME}.64.exe        ${DEST}/all/ && ln -s ../all/${EXECNAME}.64.exe        ${DEST}/windows-x86_64/${EXECNAME}.exe ; fi
+	set -e ; if [ -f target/${EXECNAME}.32.exe        ] ; then mkdir -p ${DEST}/windows-i686   && cp target/${EXECNAME}.32.exe        ${DEST}/all/ && ln -s ../all/${EXECNAME}.32.exe        ${DEST}/windows-i686/${EXECNAME}.exe   ; fi
 
 run:local
 	./target/${EXECNAME} ${RUNARGS}
