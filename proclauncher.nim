@@ -42,6 +42,7 @@ proc launchJli*(jlilib:string, args:seq[string]) =
     debug "Launching (jli): " & jlilib & " " & $args
     let cargs:cstringArray = allocCStringArray(args)
     let exitcode = launchjli(jlilib.cstring, args.len, cargs)
+    echo "JLI aborted"
     deallocCStringArray(cargs)
     quit(exitcode)
 

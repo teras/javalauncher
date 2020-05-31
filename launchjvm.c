@@ -31,7 +31,7 @@ int launchjli(char *jlilib, int argc, char** argv) {
 	 LIBTYPE libJLI = OPENLIB(jlilib);
 	if (!libJLI)
 	{
-		printf("Unable to load library %s\n", __FILE__,jlilib);
+		printf("Unable to load library %s\n", jlilib);
 		return 1;
 	}
 	JLI_Launch_f JLI_Launch = LIBFUNC(libJLI, "JLI_Launch");
@@ -45,7 +45,7 @@ int launchjli(char *jlilib, int argc, char** argv) {
 						0, NULL,
 						"",
 						"",
-						NULL,
+						"javalauncher",
 						NULL,
 						JNI_FALSE,
 						JNI_FALSE,

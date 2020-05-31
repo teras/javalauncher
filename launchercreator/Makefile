@@ -135,8 +135,8 @@ install: | all install-only
 install-only:
 	set -e ; mkdir -p ${DEST}/all
 	set -e ; rm -rf ${DEST}/all/${EXECNAME}.* ; rm -f ${DEST}/darwin-x86_64/${EXECNAME} ${DEST}/linux-x86_64/${EXECNAME} ${DEST}/linux-arm/${EXECNAME} ${DEST}/linux-aarch64/${EXECNAME} ${DEST}/windows-x86_64/${EXECNAME}.exe ${DEST}/windows-i686/${EXECNAME}.exe
-	set -e ; if [ -f target/${EXECNAME}.osx           ] ; then mkdir -p ${DEST}/darwin-x86_64/ && cp target/${EXECNAME}.osx           ${DEST}/all/ && ln -s ../all/${EXECNAME}.osx           ${DEST}/darwin-x86_64/${EXECNAME}      ; fi
-	set -e ; if [ -f target/${EXECNAME}.linux         ] ; then mkdir -p ${DEST}/linux-x86_64/  && cp target/${EXECNAME}.linux         ${DEST}/all/ && ln -s ../all/${EXECNAME}.linux         ${DEST}/linux-x86_64/${EXECNAME}       ; fi
+	set -e ; if [ -f target/${EXECNAME}.osx           ] ; then mkdir -p ${DEST}/darwin-x86_64  && cp target/${EXECNAME}.osx           ${DEST}/all/ && ln -s ../all/${EXECNAME}.osx           ${DEST}/darwin-x86_64/${EXECNAME}      ; fi
+	set -e ; if [ -f target/${EXECNAME}.linux         ] ; then mkdir -p ${DEST}/linux-x86_64   && cp target/${EXECNAME}.linux         ${DEST}/all/ && ln -s ../all/${EXECNAME}.linux         ${DEST}/linux-x86_64/${EXECNAME}       ; fi
 	set -e ; if [ -f target/${EXECNAME}.arm.linux     ] ; then mkdir -p ${DEST}/linux-arm      && cp target/${EXECNAME}.arm.linux     ${DEST}/all/ && ln -s ../all/${EXECNAME}.arm.linux     ${DEST}/linux-arm/${EXECNAME}          ; fi
 	set -e ; if [ -f target/${EXECNAME}.aarch64.linux ] ; then mkdir -p ${DEST}/linux-aarch64  && cp target/${EXECNAME}.aarch64.linux ${DEST}/all/ && ln -s ../all/${EXECNAME}.aarch64.linux ${DEST}/linux-aarch64/${EXECNAME}      ; fi
 	set -e ; if [ -f target/${EXECNAME}.64.exe        ] ; then mkdir -p ${DEST}/windows-x86_64 && cp target/${EXECNAME}.64.exe        ${DEST}/all/ && ln -s ../all/${EXECNAME}.64.exe        ${DEST}/windows-x86_64/${EXECNAME}.exe ; fi

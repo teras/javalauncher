@@ -39,7 +39,7 @@ template docker(bits32:bool) =
     let cpu = if bits32: "i386" else: "amd64"
     let strip = if bits32: "i686-w64-mingw32-strip" else: "x86_64-w64-mingw32-strip"
     let cmd = "docker run --rm -v " & (target & ":/root/target").quoteShell &
-        " teras/javalauncher bash -c \"nim c -d:release --opt:size --passC:-Iinclude --passC:-Iinclude/windows -d:mingw" &
+        " crossmob/javalauncher bash -c \"nim c -d:release --opt:size --passC:-Iinclude --passC:-Iinclude/windows -d:mingw" &
         (if o.name != "": safeSP("-d:APPNAME=" & o.name) else: "") &
         (if o.company != "": safeSP("-d:COMPANY=" & o.company) else: "") &
         (if o.description != "": safeSP("-d:DESCRIPTION=" & o.description) else: "") &

@@ -5,4 +5,4 @@ services:
         build:
             context: .
             dockerfile: Dockerfile
-        image: teras/javalauncher
+        image: crossmob/javalauncher

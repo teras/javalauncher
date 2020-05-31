@@ -4,9 +4,9 @@ from strutils import startsWith
 import sequtils
 
 let clp = commandLineParams()
+let launcherPath = findSelf()
 
 let jlilib = findJliLib()
-let launcherPath = findSelf()
 if jlilib.len > 0 and isalreadyParsed(clp):
     launchJli(jlilib, concat(@[launcherPath], clp))
     # will quit here
@@ -41,14 +41,24 @@ for arg in clp:
 if getHiDpi() > 140 and not vmArgs.hasDpiArg:
         vmArgs.add("-Dsun.java2d.uiScale=2")
 
-# Call Java
+
 let args = concat(@[launcherPath], vmArgs, @["-jar", jarPath], appArgs)
-if jlilib != "":
-    launchJli(jlilib, args)
-else:
+
+template callJli() =
+    if jlilib != "":
+        launchJli(jlilib, args)
+template callJvm() =
     let javalib = findJvmLib()
     if javalib != "":
         launchjvm(javalib, vmArgs, jarPath, appArgs, mainclass, splashscreen, classpath)
-    else:
-        let javabin = findJava()
+template callJre() =
+    let javabin = findJava()
+    if javabin != "":
         launchJre(javabin, args)
+    
+when system.hostOS == "windows":
+    callJre()
+else:
+    callJli()
+    callJvm()
+    callJre()

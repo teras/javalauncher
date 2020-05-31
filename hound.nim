@@ -32,9 +32,12 @@ proc findSelf*(): string {.inline.} = getAppFilename().absolutePath().normalized
 proc findJliLib*(): string =
     template returnIf(loc: string): untyped =
         let target = loc & DirSep & JLILIB
-        if target.fileExists: return target
+        if target.fileExists:
+            debug "Found JLI under " & target
+            return target
     template returnIfBoth(location:string): untyped =
         returnIf location & DirSep & "lib" & DirSep & "jli"
+        returnIf location & DirSep & "lib"
         returnIf location & DirSep & "bin"
 
     let current = findSelf().parentDir()
@@ -56,7 +59,9 @@ proc findJliLib*(): string =
 proc findJvmLib*(): string =
     template returnIf(loc: string): untyped =
         let target = loc & DirSep & JVMLIB
-        if target.fileExists: return target
+        if target.fileExists:
+            echo "Found JVM under " & target
+            return target
     template returnIfBoth(location:string): untyped =
         returnIf location & DirSep & "lib" & DirSep & "server"
         returnIf location & DirSep & "bin" & DirSep & "server"
@@ -82,6 +87,7 @@ proc findJava*(): string =
     template returnIf(location: string): untyped =
         let javabin = location & DirSep & JAVA
         if javabin.fileExists:
+            echo "Found Java under " & javabin
             return javabin
     template returnIf(locations: seq[string]): untyped =
         for path in locations:
