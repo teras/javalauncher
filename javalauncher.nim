@@ -6,10 +6,25 @@ import sequtils
 let clp = commandLineParams()
 let launcherPath = findSelf()
 
-let jlilib = findJliLib()
-if jlilib.len > 0 and isalreadyParsed(clp):
-    launchJli(jlilib, concat(@[launcherPath], clp))
-    # will quit here
+const PREFER_JRE = system.hostOS == "windows"
+template callJli() =
+    let jlilib = findJliLib()
+    if jlilib != "":
+        launchJli(jlilib, args)
+template callJvm() =
+    let javalib = findJvmLib()
+    if javalib != "":
+        launchjvm(javalib, vmArgs, jarPath, appArgs, mainclass, splashscreen, classpath)
+template callJre() =
+    let javabin = findJava()
+    if javabin != "":
+        launchJre(javabin, args)
+
+if not PREFER_JRE:
+    let jlilib = findJliLib()
+    if jlilib.len > 0 and isalreadyParsed(clp):
+        launchJli(jlilib, concat(@[launcherPath], clp))
+        # will quit here
 
 var vmArgs: seq[string]
 var appArgs: seq[string]
@@ -43,20 +58,7 @@ if getHiDpi() > 140 and not vmArgs.hasDpiArg:
 
 
 let args = concat(@[launcherPath], vmArgs, @["-jar", jarPath], appArgs)
-
-template callJli() =
-    if jlilib != "":
-        launchJli(jlilib, args)
-template callJvm() =
-    let javalib = findJvmLib()
-    if javalib != "":
-        launchjvm(javalib, vmArgs, jarPath, appArgs, mainclass, splashscreen, classpath)
-template callJre() =
-    let javabin = findJava()
-    if javabin != "":
-        launchJre(javabin, args)
-    
-when system.hostOS == "windows":
+when PREFER_JRE:
     callJre()
 else:
     callJli()

@@ -1,4 +1,4 @@
-import debug, os, strutils
+import debug, os, strutils, pure.strformat
 
 const JAVA = when system.hostOS == "windows": "javaw.exe" else: "java"
 const JVMLIB = when system.hostOS == "macosx": "libjvm.dylib"
@@ -27,24 +27,30 @@ const JVMPATHS = @[
     "/usr/lib/jvm/"
 ]
 
+# When given at compile time, the JRE/JAR paths could be pinned
+const JARPATH {.strdefine.} = ""
+const JREPATH {.strdefine.} = ""
+
 proc findSelf*(): string {.inline.} = getAppFilename().absolutePath().normalizedPath()
 
 proc findJliLib*(): string =
     template returnIf(loc: string): untyped =
-        let target = loc & DirSep & JLILIB
+        let target = loc / JLILIB
         if target.fileExists:
             debug "Found JLI under " & target
             return target
     template returnIfBoth(location:string): untyped =
-        returnIf location & DirSep & "lib" & DirSep & "jli"
-        returnIf location & DirSep & "lib"
-        returnIf location & DirSep & "bin"
+        returnIf location / "lib" / "jli"
+        returnIf location / "lib"
+        returnIf location / "bin"
 
     let current = findSelf().parentDir()
-    returnIfBoth current.parentDir & DirSep & "jre"
-    returnIfBoth current.parentDir & DirSep & "Java"
-    returnIfBoth current & DirSep & "jre"
-    returnIfBoth current & DirSep & "Java"
+    if JREPATH!="":
+        returnIfBoth if JREPATH.isAbsolute: JREPATH else: current / JREPATH
+    returnIfBoth current.parentDir / "jre"
+    returnIfBoth current.parentDir / "Java"
+    returnIfBoth current / "jre"
+    returnIfBoth current / "Java"
     returnIfBoth getEnv("JAVA_HOME")
     for jvmpath in JVMPATHS:
         for dir in walkDir jvmpath:
@@ -58,20 +64,22 @@ proc findJliLib*(): string =
 
 proc findJvmLib*(): string =
     template returnIf(loc: string): untyped =
-        let target = loc & DirSep & JVMLIB
+        let target = loc/ JVMLIB
         if target.fileExists:
             echo "Found JVM under " & target
             return target
     template returnIfBoth(location:string): untyped =
-        returnIf location & DirSep & "lib" & DirSep & "server"
-        returnIf location & DirSep & "bin" & DirSep & "server"
+        returnIf location / "lib" / "server"
+        returnIf location / "bin" / "server"
 
     let current = findSelf().parentDir()
-    returnIfBoth current.parentDir & DirSep & "jre"
-    returnIfBoth current.parentDir & DirSep & "Java"
-    returnIfBoth current & DirSep & "jre"
-    returnIfBoth current & DirSep & "Java"
-    returnIfBoth getEnv("JAVA_HOME") & DirSep & "jre"
+    if JREPATH!="":
+        returnIfBoth if JREPATH.isAbsolute: JREPATH else: current / JREPATH
+    returnIfBoth current.parentDir / "jre"
+    returnIfBoth current.parentDir / "Java"
+    returnIfBoth current / "jre"
+    returnIfBoth current / "Java"
+    returnIfBoth getEnv("JAVA_HOME") / "jre"
     returnIfBoth getEnv("JAVA_HOME")
     for jvmpath in JVMPATHS:
         for dir in walkDir jvmpath:
@@ -85,7 +93,8 @@ proc findJvmLib*(): string =
 
 proc findJava*(): string =
     template returnIf(location: string): untyped =
-        let javabin = location & DirSep & JAVA
+        let javabin = location / JAVA
+        echo javabin
         if javabin.fileExists:
             echo "Found Java under " & javabin
             return javabin
@@ -95,12 +104,14 @@ proc findJava*(): string =
     template returnIfRec(location: string): untyped =
         for dir in walkDir location:
             if dir.kind == PathComponent.pcDir:
-                returnIf dir.path & DirSep & "bin"
+                returnIf dir.path / "bin"
 
     var current = findSelf().parentDir()
+    if JREPATH!="":
+        returnIf if JREPATH.isAbsolute: JREPATH / "bin" else: current / JREPATH / "bin"
     returnIfRec current
     returnIfRec current.parentDir
-    returnIf getEnv("JAVA_HOME") & DirSep & "bin"
+    returnIf getEnv("JAVA_HOME") / "bin"
     returnIf getEnv("PATH").split(PathSep)
     returnIf PATHS
     error "Unable to locate Java executable"
@@ -121,17 +132,17 @@ proc findFile*(path: string, name: string, ext:string, fuzzy=false): string =
                     return bestMatch
             else:
                 let fullname = file & "." & ext
-                var target = dir & DirSep & fullname
+                var target = dir / fullname
                 if target.fileExists:
                     return target
-                target = dir & DirSep & fullname.toLowerAscii
+                target = dir / fullname.toLowerAscii
                 if target.fileExists:
                     return target
     returnIf path, name
-    returnIf path & DirSep & "lib", name
-    returnIf path.parentDir & DirSep & "Java", name
-    returnIf path.parentDir & DirSep & "lib", name
-    returnIf path.parentDir & DirSep & "Resources" & DirSep & "Java", name
+    returnIf path / "lib", name
+    returnIf path.parentDir / "Java", name
+    returnIf path.parentDir / "lib", name
+    returnIf path.parentDir / "Resources" / "Java", name
     return if fuzzy: "" else: findFile(path, name, ext, true)
 
 proc stripName*(name:string):string=
@@ -145,6 +156,13 @@ proc stripName*(name:string):string=
     return name
 
 proc findJar*(enclosingDir:string, name:string): string =
+    if JARPATH!="":
+        if JARPATH.isAbsolute:
+            if JARPATH.fileExists:
+                return JARPATH
+        else:
+            if (enclosingDir / JARPATH).fileExists:
+                return (enclosingDir / JARPATH)
     let found = findFile(enclosingDir, stripName(name) , "jar")
     if found != "" : result = found else: error "Unable to locate JAR around location " & enclosingDir
     debug "JAR path is " & result

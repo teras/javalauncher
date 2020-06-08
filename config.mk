@@ -17,7 +17,7 @@ NIMBLE=nim_miniz
 WINAPP:=gui
 
 push:
-	set -e ; cd launchercreator ; make clean ; make install
+	# set -e ; cd launchercreator ; make clean ; make install
 	docker-compose build
 	docker-compose push
 
