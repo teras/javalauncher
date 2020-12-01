@@ -8,7 +8,9 @@ LINUXNIMOPTS:=--passC:-Iinclude/linux
 
 WINDOWSNIMOPTS:=--passC:-Iinclude/windows
 
-ALLTARGETS=osx linux
+PINIMOPTS:=--passC:-Iinclude/linux
+
+ALLTARGETS=osx linux pi
 
 NIMBLE=nim_miniz
 

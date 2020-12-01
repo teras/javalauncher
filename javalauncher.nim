@@ -31,6 +31,7 @@ var appArgs: seq[string]
 var mainclass: string
 var splashscreen: string
 var classpath: string
+var forceDPI: bool
 
 # launcher
 let launcherDir = launcherPath.parentDir()
@@ -42,7 +43,7 @@ let jarName = findJarName(launcherBase, filejson)
 let jarPath = findJar(launcherDir, jarName)
 let jarDir = jarPath.parentDir
 let json = updateJsonFromJar(jarPath, filejson)
-populateArguments(json, vmArgs, appArgs, mainclass, splashscreen, classpath, jarDir, launcherDir)
+populateArguments(json, vmArgs, appArgs, mainclass, splashscreen, classpath, jarDir, launcherDir, forceDPI)
 vmArgs.add("-Dself.exec=" & launcherPath)
 
 var still_starting = true
@@ -53,8 +54,8 @@ for arg in clp:
         still_starting = false
         appArgs.add(arg)
 
-if getHiDpi() > 140 and not vmArgs.hasDpiArg:
-        vmArgs.add("-Dsun.java2d.uiScale=2")
+if forceDPI and getHiDpi() > 140 and not vmArgs.hasDpiArg:
+    vmArgs.add("-Dsun.java2d.uiScale=2")
 
 
 let args = concat(@[launcherPath], vmArgs, @["-jar", jarPath], appArgs)

@@ -1,10 +1,15 @@
-import nim_miniz, debug, json, hound, os, manifest
+import nim_miniz, debug, json, hound, os, manifest, strutils
 from strutils import replace
 
 const LAUNCHER_FILE = "javalauncher"
 const LAUNCHER_EXT = "json"
 const LAUNCHER_INF = "META-INF/LAUNCHER.INF"
 const MANIFEST_MF = "META-INF/MANIFEST.MF"
+
+proc stringToBool(val:string):bool =
+    let val = val.toLowerAscii
+    return val == "true" or val == "yes" or val.startsWith("enable") or val == "1"
+
 
 proc updateJsonFromJar*(file: string, fileJson: JsonNode): JsonNode =
     when system.hostOS == "windows":
@@ -45,7 +50,7 @@ proc findJarName*(selfName:string, json:JsonNode) : string =
 
 proc populateArguments*(json: JsonNode, vmargs:var seq[string], postArgs:var seq[string],
         mainclass:var string, splashscreen:var string, classpath:var string,
-        jarDir:string, launcherDir:string)  =
+        jarDir:string, launcherDir:string, forceDPI: var bool)  =
     proc asArg(item: string): string =
         return item
             .replace("@@JAR_LOCATION@@", jarDir)
@@ -64,3 +69,4 @@ proc populateArguments*(json: JsonNode, vmargs:var seq[string], postArgs:var seq
     mainclass = populateItem("main-class")
     splashscreen = populateItem("splashscreen-image")
     classpath = populateItem("class-path")
+    forceDPI = populateItem("forcedpi").toLowerAscii.stringToBool
