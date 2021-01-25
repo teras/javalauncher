@@ -33,7 +33,7 @@ const JREPATH {.strdefine.} = ""
 
 proc findSelf*(): string {.inline.} = getAppFilename().absolutePath().normalizedPath()
 
-proc findJliLib*(): string =
+proc findJliLib*(local:bool): string =
     template returnIf(loc: string): untyped =
         let target = loc / JLILIB
         if target.fileExists:
@@ -44,59 +44,62 @@ proc findJliLib*(): string =
         returnIf location / "lib"
         returnIf location / "bin"
 
-    let current = findSelf().parentDir()
-    if JREPATH!="":
-        returnIfBoth if JREPATH.isAbsolute: JREPATH else: current / JREPATH
-    returnIfBoth current.parentDir / "jre"
-    returnIfBoth current.parentDir / "Java"
-    returnIfBoth current / "jre"
-    returnIfBoth current / "Java"
-    returnIfBoth getEnv("JAVA_HOME")
-    for jvmpath in JVMPATHS:
-        for dir in walkDir jvmpath:
-            if dir.kind == PathComponent.pcDir:
-                let path = dir.path
-                when system.hostOS == "macosx":
-                    returnIfBoth path & "/Contents/Home/jre"
-                when system.hostOS == "linux":
-                    returnIfBoth path & "/jre/lib/amd64"
+    if local:
+        let current = findSelf().parentDir()
+        if JREPATH!="":
+            returnIfBoth if JREPATH.isAbsolute: JREPATH else: current / JREPATH
+        returnIfBoth current.parentDir / "jre"
+        returnIfBoth current.parentDir / "Java"
+        returnIfBoth current / "jre"
+        returnIfBoth current / "Java"
+    else:
+        returnIfBoth getEnv("JAVA_HOME")
+        for jvmpath in JVMPATHS:
+            for dir in walkDir jvmpath:
+                if dir.kind == PathComponent.pcDir:
+                    let path = dir.path
+                    when system.hostOS == "macosx":
+                        returnIfBoth path & "/Contents/Home/jre"
+                    when system.hostOS == "linux":
+                        returnIfBoth path & "/jre/lib/amd64"
     ""
 
-proc findJvmLib*(): string =
+proc findJvmLib*(local:bool): string =
     template returnIf(loc: string): untyped =
-        let target = loc/ JVMLIB
+        let target = loc / JVMLIB
         if target.fileExists:
-            echo "Found JVM under " & target
+            debug "Found JVM under " & target
             return target
     template returnIfBoth(location:string): untyped =
         returnIf location / "lib" / "server"
         returnIf location / "bin" / "server"
 
-    let current = findSelf().parentDir()
-    if JREPATH!="":
-        returnIfBoth if JREPATH.isAbsolute: JREPATH else: current / JREPATH
-    returnIfBoth current.parentDir / "jre"
-    returnIfBoth current.parentDir / "Java"
-    returnIfBoth current / "jre"
-    returnIfBoth current / "Java"
-    returnIfBoth getEnv("JAVA_HOME") / "jre"
-    returnIfBoth getEnv("JAVA_HOME")
-    for jvmpath in JVMPATHS:
-        for dir in walkDir jvmpath:
-            if dir.kind == PathComponent.pcDir:
-                let path = dir.path
-                when system.hostOS == "macosx":
-                    returnIfBoth path & "/Contents/Home/jre"
-                when system.hostOS == "linux":
-                    returnIfBoth path & "/jre/lib/amd64"
+    if local:
+        let current = findSelf().parentDir()
+        if JREPATH!="":
+            returnIfBoth if JREPATH.isAbsolute: JREPATH else: current / JREPATH
+        returnIfBoth current.parentDir / "jre"
+        returnIfBoth current.parentDir / "Java"
+        returnIfBoth current / "jre"
+        returnIfBoth current / "Java"
+    else:
+        returnIfBoth getEnv("JAVA_HOME") / "jre"
+        returnIfBoth getEnv("JAVA_HOME")
+        for jvmpath in JVMPATHS:
+            for dir in walkDir jvmpath:
+                if dir.kind == PathComponent.pcDir:
+                    let path = dir.path
+                    when system.hostOS == "macosx":
+                        returnIfBoth path & "/Contents/Home/jre"
+                    when system.hostOS == "linux":
+                        returnIfBoth path & "/jre/lib/amd64"
     ""
 
-proc findJava*(): string =
+proc findJava*(local:bool): string =
     template returnIf(location: string): untyped =
         let javabin = location / JAVA
-        echo javabin
         if javabin.fileExists:
-            echo "Found Java under " & javabin
+            debug "Found Java under " & javabin
             return javabin
     template returnIf(locations: seq[string]): untyped =
         for path in locations:
@@ -106,14 +109,16 @@ proc findJava*(): string =
             if dir.kind == PathComponent.pcDir:
                 returnIf dir.path / "bin"
 
-    var current = findSelf().parentDir()
-    if JREPATH!="":
-        returnIf if JREPATH.isAbsolute: JREPATH / "bin" else: current / JREPATH / "bin"
-    returnIfRec current
-    returnIfRec current.parentDir
-    returnIf getEnv("JAVA_HOME") / "bin"
-    returnIf getEnv("PATH").split(PathSep)
-    returnIf PATHS
+    if local:
+        var current = findSelf().parentDir()
+        if JREPATH!="":
+            returnIf if JREPATH.isAbsolute: JREPATH / "bin" else: current / JREPATH / "bin"
+        returnIfRec current
+        returnIfRec current.parentDir
+    else:
+        returnIf getEnv("JAVA_HOME") / "bin"
+        returnIf getEnv("PATH").split(PathSep)
+        returnIf PATHS
     error "Unable to locate Java executable"
 
 proc findFile*(path: string, name: string, ext:string, fuzzy=false): string =

@@ -7,22 +7,24 @@ let clp = commandLineParams()
 let launcherPath = findSelf()
 
 const PREFER_JRE = system.hostOS == "windows"
-template callJli() =
-    let jlilib = findJliLib()
+template callJli(local:bool) =
+    let jlilib = findJliLib(local)
     if jlilib != "":
         launchJli(jlilib, args)
-template callJvm() =
-    let javalib = findJvmLib()
+template callJvm(local:bool) =
+    let javalib = findJvmLib(local)
     if javalib != "":
         launchjvm(javalib, vmArgs, jarPath, appArgs, mainclass, splashscreen, classpath)
-template callJre() =
-    let javabin = findJava()
+template callJre(local:bool) =
+    let javabin = findJava(local)
     if javabin != "":
         launchJre(javabin, args)
 
-if not PREFER_JRE:
-    let jlilib = findJliLib()
-    if jlilib.len > 0 and isalreadyParsed(clp):
+if not PREFER_JRE and isalreadyParsed(clp):
+    var jlilib = findJliLib(true)
+    if jlilib == "":
+        jlilib = findJliLib(false)
+    if jlilib.len > 0:
         launchJli(jlilib, concat(@[launcherPath], clp))
         # will quit here
 
@@ -60,8 +62,12 @@ if forceDPI and getHiDpi() > 140 and not vmArgs.hasDpiArg:
 
 let args = concat(@[launcherPath], vmArgs, @["-jar", jarPath], appArgs)
 when PREFER_JRE:
-    callJre()
+    callJre(true)
+    callJre(false)
 else:
-    callJli()
-    callJvm()
-    callJre()
+    callJli(true)
+    callJvm(true)
+    callJre(true)
+    callJli(false)
+    callJvm(false)
+    callJre(false)
