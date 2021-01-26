@@ -10,7 +10,7 @@ WINDOWSNIMOPTS:=--passC:-Iinclude/windows
 
 PINIMOPTS:=--passC:-Iinclude/linux
 
-ALLTARGETS=osx linux pi
+ALLTARGETS=osx linux arm
 
 NIMBLE=nim_miniz
 
