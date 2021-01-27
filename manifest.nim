@@ -6,7 +6,7 @@ proc parseManifestLine(line:string, dict:TableRef[string,string]) =
         return
     let colon = line.find(':')
     if colon < 1: raise newException(Exception, "Error in manifest file: no colon found")
-    dict.add(line.substr(0, colon-1).strip.toLowerAscii, line.substr(colon+1).strip)
+    dict[line.substr(0, colon-1).strip.toLowerAscii] = line.substr(colon+1).strip
 
 proc parseManifest*(data:string) : TableRef[string,string] =
     result = newTable[string,string]()
