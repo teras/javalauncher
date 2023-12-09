@@ -2,7 +2,7 @@ NAME=javalauncher
 
 NIMOPTS:=--passC:-Iinclude
 
-OSXNIMOPTS:=--passC:-Iinclude/darwin
+MACNIMOPTS:=--passC:-Iinclude/darwin
 
 LINUXNIMOPTS:=--passC:-Iinclude/linux
 
@@ -10,7 +10,7 @@ WINDOWSNIMOPTS:=--passC:-Iinclude/windows
 
 PINIMOPTS:=--passC:-Iinclude/linux
 
-ALLTARGETS=osx linux arm
+ALLTARGETS=mac linux arm
 
 NIMBLE=nim_miniz
 
