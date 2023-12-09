@@ -145,22 +145,25 @@ proc findFile*(path: string, name: string, ext:string, fuzzy=false): string =
                     return target
     returnIf path, name
     returnIf path / "lib", name
+    returnIf path / "app", name
     returnIf path.parentDir / "Java", name
     returnIf path.parentDir / "lib", name
+    returnIf path.parentDir / "app", name
     returnIf path.parentDir / "Resources" / "Java", name
     return if fuzzy: "" else: findFile(path, name, ext, true)
 
 proc stripName*(name:string):string=
     var name = name
     if name.toLowerAscii().endsWith(".exe"):
-        name.delete(name.len-4, name.len)
+        name.delete(name.len-4..name.len)
     if name.endsWith("32") or name.endsWith("64"):
-        name.delete(name.len-1, name.len)
+        name.delete(name.len-1..name.len)
         if (name == ""):
             error "Not a valid executable"
     return name
 
 proc findJar*(enclosingDir:string, name:string): string =
+    let enclosingDir = if enclosingDir.toLower.endsWith("macos"): enclosingDir.parentDir else: enclosingDir
     if JARPATH!="":
         if JARPATH.isAbsolute:
             if JARPATH.fileExists:

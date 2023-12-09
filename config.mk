@@ -14,6 +14,8 @@ ALLTARGETS=mac linux arm
 
 NIMBLE=nim_miniz
 
+SRCONTX=include launchjvm.c
+
 #COMPRESS=true
 
 WINAPP:=gui
