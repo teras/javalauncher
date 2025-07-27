@@ -1,4 +1,4 @@
-import debug, os, strutils, pure.strformat
+import debug, os, strutils, pure/strformat
 
 const JAVA = when system.hostOS == "windows": "javaw.exe" else: "java"
 const JVMLIB = when system.hostOS == "macosx": "libjvm.dylib"

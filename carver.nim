@@ -1,5 +1,4 @@
 import nim_miniz, debug, json, hound, os, manifest, strutils
-from strutils import replace
 
 const LAUNCHER_FILE = "javalauncher"
 const LAUNCHER_EXT = "json"

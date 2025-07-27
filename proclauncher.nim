@@ -1,4 +1,4 @@
-import posix, debug, sequtils, strutils, os, system, winres
+import posix, debug, sequtils, strutils, os, system
 
 const CP_SEP = when system.hostOS == "windows": ";" else: ":"
 
@@ -18,7 +18,7 @@ proc constructClassPath(jarfile:string, classpath:string) : string =
     let basepath = jarfile.parentDir
     for jar in classpath.splitWhitespace:
         let newfile = joinPath(basepath, jar)
-        if not newfile.existsFile:
+        if not newfile.fileExists:
             echo "WARNING: Unable to locate JAR file " & newfile
         else:
             result = result & CP_SEP & newfile

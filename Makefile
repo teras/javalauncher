@@ -83,7 +83,7 @@ endif
 
 BUILDDEP:=$(wildcard *.nim *.c *.m Makefile config.mk)
 
-initlocal:
+localinit:	## Initialize local nimble environment
 	${NIMVER} ${NIMBLE}
 
 local:target/${EXECNAME}	## Create a binary based on locally installed nim compilers
@@ -220,7 +220,7 @@ target/${EXECNAME}:${BUILDDEP}
 	mkdir -p target
 	$(if $(findstring l,$(TYPEARG)), $(eval TYPEPARAM=--noMain:on --app:lib))
 	$(if $(findstring s,$(TYPEARG)), $(eval TYPEPARAM=--gcc.exe:$(CPREF)gcc --gcc.linkerexe:$(CPREF)gcc --passL:-static))
-	${NIMVER} ${LOCALNIM} ${COMPILER} ${BASENIMOPTS} ${EXTRA} ${TYPEPARAM} -d:lto --outdir:./target ${NAME}
+	${NIMVER} ${LOCALNIM} ${COMPILER} ${BASENIMOPTS} $(LINUXNIMOPTS) ${EXTRA} ${TYPEPARAM} -d:lto --outdir:./target ${NAME}
 
 target/${EXECNAME}.linux:${BUILDDEP}
 	mkdir -p target
